@@ -14,7 +14,242 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          occurred_at: string
+          policy_id: string | null
+          summary: string
+          type: Database["public"]["Enums"]["activity_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          occurred_at?: string
+          policy_id?: string | null
+          summary: string
+          type?: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          occurred_at?: string
+          policy_id?: string | null
+          summary?: string
+          type?: Database["public"]["Enums"]["activity_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          notes: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["client_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["client_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["client_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      policies: {
+        Row: {
+          annual_premium: number | null
+          application_date: string | null
+          carrier: string
+          client_id: string
+          created_at: string
+          face_amount: number | null
+          id: string
+          issue_date: string | null
+          notes: string | null
+          policy_number: string | null
+          product_type: string
+          renewal_date: string | null
+          status: Database["public"]["Enums"]["policy_status"]
+          target_commission: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_premium?: number | null
+          application_date?: string | null
+          carrier: string
+          client_id: string
+          created_at?: string
+          face_amount?: number | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          policy_number?: string | null
+          product_type: string
+          renewal_date?: string | null
+          status?: Database["public"]["Enums"]["policy_status"]
+          target_commission?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_premium?: number | null
+          application_date?: string | null
+          carrier?: string
+          client_id?: string
+          created_at?: string
+          face_amount?: number | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          policy_number?: string | null
+          product_type?: string
+          renewal_date?: string | null
+          status?: Database["public"]["Enums"]["policy_status"]
+          target_commission?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policies_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          agency: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          license_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          agency?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          license_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agency?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          license_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          client_id: string | null
+          completed: boolean
+          created_at: string
+          due_at: string | null
+          id: string
+          policy_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          completed?: boolean
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          policy_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          completed?: boolean
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          policy_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +258,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_type: "call" | "email" | "meeting" | "note"
+      client_status: "prospect" | "active" | "inactive"
+      policy_status:
+        | "quoted"
+        | "submitted"
+        | "underwriting"
+        | "medical_scheduled"
+        | "approved"
+        | "issued"
+        | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +394,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_type: ["call", "email", "meeting", "note"],
+      client_status: ["prospect", "active", "inactive"],
+      policy_status: [
+        "quoted",
+        "submitted",
+        "underwriting",
+        "medical_scheduled",
+        "approved",
+        "issued",
+        "declined",
+      ],
+    },
   },
 } as const
