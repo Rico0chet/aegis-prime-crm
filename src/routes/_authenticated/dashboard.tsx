@@ -97,7 +97,45 @@ const statusStyles: Record<Exclude<PipelineStatus, "All">, string> = {
 };
 
 function ProducerDesk() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [profile, setProfile] = useState<{ full_name: string | null; agency: string | null } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, agency")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+      if (!cancelled) {
+        setProfile(
+          data ?? { full_name: (userData.user.email ?? "Producer").split("@")[0] ?? null, agency: null },
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const producerName = profile?.full_name ?? "Producer";
+  const producerAgency = profile?.agency ?? null;
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
   const [activeNav, setActiveNav] = useState("Executive Desk");
+
   const [pipelineFilter, setPipelineFilter] = useState<PipelineStatus>("All");
   const [contacted, setContacted] = useState(false);
   const [reportReady, setReportReady] = useState(false);
