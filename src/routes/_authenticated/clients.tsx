@@ -165,7 +165,7 @@ function ClientsPage() {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-3">
-                <div className="hidden items-center gap-2 sm:flex">
+                <div className="flex items-center gap-2">
                   <Switch
                     checked={client.birthday_email_enabled}
                     onCheckedChange={(enabled) =>
@@ -179,7 +179,7 @@ function ClientsPage() {
                     }
                     aria-label={`Birthday emails for ${client.first_name} ${client.last_name}`}
                   />
-                  <span className="text-[10px] text-brand-muted">Birthday emails</span>
+                  <span className="hidden text-[10px] text-brand-muted md:inline">Birthday emails</span>
                 </div>
                 <div className="text-right">
                   <span className="inline-flex rounded-full bg-brand-surface px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-brand-muted ring-1 ring-brand-border">
