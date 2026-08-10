@@ -17,6 +17,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticated/renewals'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as ApiPublicHooksBirthdayEmailsRouteImport } from './routes/api/public/hooks/birthday-emails'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +58,12 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicHooksBirthdayEmailsRoute =
+  ApiPublicHooksBirthdayEmailsRouteImport.update({
+    id: '/api/public/hooks/birthday-emails',
+    path: '/api/public/hooks/birthday-emails',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,6 +95,7 @@ export interface FileRoutesById {
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/renewals': typeof AuthenticatedRenewalsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/renewals'
     | '/tasks'
+    | '/api/public/hooks/birthday-emails'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/pipeline'
     | '/renewals'
     | '/tasks'
+    | '/api/public/hooks/birthday-emails'
   id:
     | '__root__'
     | '/'
@@ -116,12 +128,14 @@ export interface FileRouteTypes {
     | '/_authenticated/pipeline'
     | '/_authenticated/renewals'
     | '/_authenticated/tasks'
+    | '/api/public/hooks/birthday-emails'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicHooksBirthdayEmailsRoute: typeof ApiPublicHooksBirthdayEmailsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -182,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/hooks/birthday-emails': {
+      id: '/api/public/hooks/birthday-emails'
+      path: '/api/public/hooks/birthday-emails'
+      fullPath: '/api/public/hooks/birthday-emails'
+      preLoaderRoute: typeof ApiPublicHooksBirthdayEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -208,17 +229,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicHooksBirthdayEmailsRoute: ApiPublicHooksBirthdayEmailsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

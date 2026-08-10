@@ -67,6 +67,8 @@ export type Database = {
       }
       clients: {
         Row: {
+          birthday_email_enabled: boolean
+          birthday_email_last_sent_year: number | null
           created_at: string
           date_of_birth: string | null
           email: string | null
@@ -80,6 +82,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          birthday_email_enabled?: boolean
+          birthday_email_last_sent_year?: number | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
@@ -93,6 +97,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          birthday_email_enabled?: boolean
+          birthday_email_last_sent_year?: number | null
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
