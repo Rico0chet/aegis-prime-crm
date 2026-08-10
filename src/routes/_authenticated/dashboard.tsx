@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Bell,
@@ -10,6 +11,7 @@ import {
   FileBarChart,
   FilePlus2,
   LayoutDashboard,
+  LogOut,
   Menu,
   MoreHorizontal,
   Phone,
@@ -26,6 +28,7 @@ import marcusPortrait from "@/assets/marcus-thorne.jpg";
 import productionTrend from "@/assets/production-trend.jpg";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
