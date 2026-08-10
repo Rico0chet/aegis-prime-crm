@@ -167,6 +167,22 @@ export function useUpdateClient() {
   });
 }
 
+export function useUpdateBirthdayEmailPreference() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      const { error } = await supabase
+        .from("clients")
+        .update({ birthday_email_enabled: enabled })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["clients"] });
+    },
+  });
+}
+
 export function useDeleteClient() {
   const qc = useQueryClient();
   return useMutation({

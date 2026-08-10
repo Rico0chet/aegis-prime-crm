@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   CLIENT_STATUSES,
   clientStatusLabel,
@@ -31,6 +32,7 @@ import {
   useClients,
   useCreateClient,
   useDeleteClient,
+  useUpdateBirthdayEmailPreference,
   type ClientStatus,
 } from "@/lib/crm";
 
@@ -58,6 +60,7 @@ function ClientsPage() {
   const { data: clients = [], isLoading } = useClients();
   const createClient = useCreateClient();
   const deleteClient = useDeleteClient();
+  const updateBirthdayPreference = useUpdateBirthdayEmailPreference();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<ClientStatus>("prospect");
 
@@ -161,7 +164,23 @@ function ClientsPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex shrink-0 items-center gap-4">
+              <div className="flex shrink-0 items-center gap-3">
+                <div className="hidden items-center gap-2 sm:flex">
+                  <Switch
+                    checked={client.birthday_email_enabled}
+                    onCheckedChange={(enabled) =>
+                      updateBirthdayPreference.mutate(
+                        { id: client.id, enabled },
+                        {
+                          onSuccess: () => toast.success(enabled ? "Birthday emails enabled" : "Birthday emails disabled"),
+                          onError: (error) => toast.error(error.message),
+                        },
+                      )
+                    }
+                    aria-label={`Birthday emails for ${client.first_name} ${client.last_name}`}
+                  />
+                  <span className="text-[10px] text-brand-muted">Birthday emails</span>
+                </div>
                 <div className="text-right">
                   <span className="inline-flex rounded-full bg-brand-surface px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-brand-muted ring-1 ring-brand-border">
                     {clientStatusLabel[client.status]}
