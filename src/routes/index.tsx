@@ -25,6 +25,7 @@ import {
 import marcusPortrait from "@/assets/marcus-thorne.jpg";
 import productionTrend from "@/assets/production-trend.jpg";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -231,9 +232,11 @@ function ProducerDesk() {
               <FileBarChart />
               <span>{reportReady ? "Report Ready" : "Generate Report"}</span>
             </Button>
+            <ThemeToggle />
             <Button variant="ghost" size="icon" aria-label="Notifications" className="hidden sm:inline-flex">
               <Bell />
             </Button>
+
           </div>
         </header>
 
