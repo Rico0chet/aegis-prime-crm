@@ -17,7 +17,6 @@ import {
   Phone,
   Plus,
   Search,
-  Settings,
   ShieldCheck,
   Sparkles,
   Users,
