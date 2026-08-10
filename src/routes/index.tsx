@@ -229,8 +229,7 @@ function ProducerDesk() {
               onClick={() => setReportReady(true)}
             >
               <FileBarChart />
-              <span className="hidden sm:inline">{reportReady ? "Report Ready" : "Generate Report"}</span>
-              <span className="sm:hidden">Report</span>
+              <span>{reportReady ? "Report Ready" : "Generate Report"}</span>
             </Button>
             <Button variant="ghost" size="icon" aria-label="Notifications" className="hidden sm:inline-flex">
               <Bell />
