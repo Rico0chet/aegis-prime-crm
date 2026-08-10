@@ -165,26 +165,29 @@ function ProducerDesk() {
           <div className="flex items-center gap-3">
             <img
               src={marcusPortrait}
-              alt="Marcus Thorne, senior producer"
+              alt="Producer portrait"
               width={816}
               height={816}
               loading="lazy"
               className="size-10 rounded-full object-cover object-top ring-1 ring-brand-sidebar-ring"
             />
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold">Marcus Thorne</p>
-              <p className="mt-0.5 text-[10px] text-brand-sidebar-muted">Senior Producer</p>
+              <p className="truncate text-xs font-semibold">{producerName}</p>
+              <p className="mt-0.5 truncate text-[10px] text-brand-sidebar-muted">
+                {producerAgency ?? "Producer"}
+              </p>
             </div>
             <Button
               variant="ghost"
               size="icon"
               className="ml-auto size-8 text-brand-sidebar-muted hover:bg-brand-sidebar-hover hover:text-brand-sidebar-foreground"
-              aria-label="Producer settings"
-              onClick={() => setActiveNav("Settings")}
+              aria-label="Sign out"
+              onClick={handleSignOut}
             >
-              <Settings />
+              <LogOut />
             </Button>
           </div>
+
         </div>
       </aside>
 
