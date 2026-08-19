@@ -65,6 +65,54 @@ export type Database = {
           },
         ]
       }
+      client_needs_analyses: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          template_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_needs_analyses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_needs_analyses_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "needs_analysis_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           birthday_email_enabled: boolean
@@ -110,6 +158,131 @@ export type Database = {
           status?: Database["public"]["Enums"]["client_status"]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      needs_analysis_answers: {
+        Row: {
+          analysis_id: string
+          created_at: string
+          id: string
+          question_id: string
+          updated_at: string
+          user_id: string
+          value: string | null
+        }
+        Insert: {
+          analysis_id: string
+          created_at?: string
+          id?: string
+          question_id: string
+          updated_at?: string
+          user_id: string
+          value?: string | null
+        }
+        Update: {
+          analysis_id?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          updated_at?: string
+          user_id?: string
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "needs_analysis_answers_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "client_needs_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "needs_analysis_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "needs_analysis_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      needs_analysis_questions: {
+        Row: {
+          created_at: string
+          help_text: string | null
+          id: string
+          input_type: Database["public"]["Enums"]["question_input_type"]
+          is_required: boolean
+          options: Json
+          prompt: string
+          sort_order: number
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          help_text?: string | null
+          id?: string
+          input_type?: Database["public"]["Enums"]["question_input_type"]
+          is_required?: boolean
+          options?: Json
+          prompt: string
+          sort_order?: number
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          help_text?: string | null
+          id?: string
+          input_type?: Database["public"]["Enums"]["question_input_type"]
+          is_required?: boolean
+          options?: Json
+          prompt?: string
+          sort_order?: number
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "needs_analysis_questions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "needs_analysis_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      needs_analysis_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          product_type: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          product_type?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          product_type?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -256,15 +429,43 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_type: "call" | "email" | "meeting" | "note"
+      app_role: "admin" | "producer"
       client_status: "prospect" | "active" | "inactive"
       policy_status:
         | "quoted"
@@ -274,6 +475,15 @@ export type Database = {
         | "approved"
         | "issued"
         | "declined"
+      question_input_type:
+        | "short_text"
+        | "long_text"
+        | "number"
+        | "currency"
+        | "date"
+        | "yes_no"
+        | "single_select"
+        | "multi_select"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -402,6 +612,7 @@ export const Constants = {
   public: {
     Enums: {
       activity_type: ["call", "email", "meeting", "note"],
+      app_role: ["admin", "producer"],
       client_status: ["prospect", "active", "inactive"],
       policy_status: [
         "quoted",
@@ -411,6 +622,16 @@ export const Constants = {
         "approved",
         "issued",
         "declined",
+      ],
+      question_input_type: [
+        "short_text",
+        "long_text",
+        "number",
+        "currency",
+        "date",
+        "yes_no",
+        "single_select",
+        "multi_select",
       ],
     },
   },
