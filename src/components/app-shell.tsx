@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/lib/crm";
+import { useIsAdmin } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 
 const navigation = [
