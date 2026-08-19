@@ -29,6 +29,8 @@ const navigation = [
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
 ] as const;
 
+const adminNavigation = [{ label: "Admin Portal", to: "/admin", icon: ShieldCheck }] as const;
+
 export function AppShell({
   title,
   eyebrow,
