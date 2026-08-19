@@ -47,6 +47,8 @@ export function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: profile } = useProfile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { data: isAdmin } = useIsAdmin();
+  const links = isAdmin ? [...navigation, ...adminNavigation] : navigation;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
