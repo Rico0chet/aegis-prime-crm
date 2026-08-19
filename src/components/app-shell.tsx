@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/lib/crm";
+import { useIsAdmin } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -26,6 +28,8 @@ const navigation = [
   { label: "Follow-ups", to: "/tasks", icon: BarChart3 },
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
 ] as const;
+
+const adminNavigation = [{ label: "Admin Portal", to: "/admin", icon: ShieldCheck }] as const;
 
 export function AppShell({
   title,
@@ -43,6 +47,8 @@ export function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: profile } = useProfile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { data: isAdmin } = useIsAdmin();
+  const links = isAdmin ? [...navigation, ...adminNavigation] : navigation;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -78,7 +84,7 @@ export function AppShell({
         </div>
 
         <nav className="flex-1 space-y-1 px-4" aria-label="Primary navigation">
-          {navigation.map(({ label, to, icon: Icon }) => {
+          {links.map(({ label, to, icon: Icon }) => {
             const isActive = pathname === to;
             return (
               <Link

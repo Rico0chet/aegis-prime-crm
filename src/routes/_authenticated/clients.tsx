@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Trash2 } from "lucide-react";
+import { ClipboardCheck, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
+import { NeedsAnalysisDialog } from "@/components/needs-analysis-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -187,6 +188,21 @@ function ClientsPage() {
                   </span>
                   <p className="mt-1 text-[10px] text-brand-muted">Added {formatDate(client.created_at)}</p>
                 </div>
+                <NeedsAnalysisDialog
+                  clientId={client.id}
+                  clientName={`${client.first_name} ${client.last_name}`}
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      aria-label={`Needs analysis for ${client.first_name} ${client.last_name}`}
+                    >
+                      <ClipboardCheck className="size-4" />
+                      <span className="hidden lg:inline">Needs analysis</span>
+                    </Button>
+                  }
+                />
                 <Button
                   variant="ghost"
                   size="icon"
