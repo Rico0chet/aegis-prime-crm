@@ -84,7 +84,7 @@ export function AppShell({
         </div>
 
         <nav className="flex-1 space-y-1 px-4" aria-label="Primary navigation">
-          {navigation.map(({ label, to, icon: Icon }) => {
+          {links.map(({ label, to, icon: Icon }) => {
             const isActive = pathname === to;
             return (
               <Link
