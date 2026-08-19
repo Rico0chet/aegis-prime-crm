@@ -88,8 +88,8 @@ export function NeedsAnalysisDialog({
             <div className="space-y-2">
               <Label>Template</Label>
               <Select
-                value={currentTemplateId}
-                onValueChange={setTemplateId}
+                value={currentTemplateId ?? ""}
+                onValueChange={(value) => setTemplateId(value)}
                 disabled={Boolean(existing)}
               >
                 <SelectTrigger>
