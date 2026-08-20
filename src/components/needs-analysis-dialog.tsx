@@ -105,13 +105,23 @@ export function NeedsAnalysisDialog({
               </Select>
             </div>
 
-            {questions.map((question) => (
-              <QuestionField
-                key={question.id}
-                question={question}
-                value={values[question.id] ?? ""}
-                onChange={(value) => setValues((prev) => ({ ...prev, [question.id]: value }))}
-              />
+            {groupBySection(questions).map(([section, items]) => (
+              <section key={section} className="space-y-4">
+                {section && (
+                  <h3 className="sticky top-0 z-10 -mx-1 bg-background/95 px-1 py-2 text-xs font-semibold uppercase tracking-wide text-brand-accent backdrop-blur">
+                    {section}
+                  </h3>
+                )}
+                {items.map((question) => (
+                  <QuestionField
+                    key={question.id}
+                    question={question}
+                    hideHelpText={Boolean(section)}
+                    value={values[question.id] ?? ""}
+                    onChange={(value) => setValues((prev) => ({ ...prev, [question.id]: value }))}
+                  />
+                ))}
+              </section>
             ))}
             {questions.length === 0 && (
               <p className="text-sm text-brand-muted">This template has no questions yet.</p>
