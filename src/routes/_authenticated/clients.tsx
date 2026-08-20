@@ -190,6 +190,20 @@ function ClientsPage() {
                   </span>
                   <p className="mt-1 text-[10px] text-brand-muted">Added {formatDate(client.created_at)}</p>
                 </div>
+                <EditClientDialog
+                  client={client}
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      aria-label={`Edit ${client.first_name} ${client.last_name}`}
+                    >
+                      <Pencil className="size-4" />
+                      <span className="hidden lg:inline">Edit</span>
+                    </Button>
+                  }
+                />
                 <NeedsAnalysisDialog
                   clientId={client.id}
                   clientName={`${client.first_name} ${client.last_name}`}
