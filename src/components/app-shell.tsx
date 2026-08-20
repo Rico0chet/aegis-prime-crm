@@ -10,6 +10,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  UserCog,
   Users,
   X,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/lib/crm";
 import { useIsAdmin } from "@/lib/admin";
+import { useAvatarUrl } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -29,6 +31,7 @@ const navigation = [
   { label: "Follow-ups", to: "/tasks", icon: BarChart3 },
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
   { label: "Data Export", to: "/export", icon: FileSpreadsheet },
+  { label: "My Profile", to: "/profile", icon: UserCog },
 ] as const;
 
 const adminNavigation = [{ label: "Admin Portal", to: "/admin", icon: ShieldCheck }] as const;
@@ -50,6 +53,7 @@ export function AppShell({
   const { data: profile } = useProfile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: isAdmin } = useIsAdmin();
+  const { data: avatarUrl } = useAvatarUrl(profile?.avatar_url);
   const links = isAdmin ? [...navigation, ...adminNavigation] : navigation;
 
   async function handleSignOut() {
@@ -108,8 +112,8 @@ export function AppShell({
         <div className="border-t border-brand-sidebar-border px-6 py-6">
           <div className="flex items-center gap-3">
             <img
-              src={marcusPortrait}
-              alt="Producer portrait"
+              src={avatarUrl ?? marcusPortrait}
+              alt={`${profile?.full_name ?? "Producer"} portrait`}
               width={816}
               height={816}
               loading="lazy"
