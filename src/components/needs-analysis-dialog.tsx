@@ -105,13 +105,23 @@ export function NeedsAnalysisDialog({
               </Select>
             </div>
 
-            {questions.map((question) => (
-              <QuestionField
-                key={question.id}
-                question={question}
-                value={values[question.id] ?? ""}
-                onChange={(value) => setValues((prev) => ({ ...prev, [question.id]: value }))}
-              />
+            {groupBySection(questions).map(([section, items]) => (
+              <section key={section} className="space-y-4">
+                {section && (
+                  <h3 className="sticky top-0 z-10 -mx-1 bg-background/95 px-1 py-2 text-xs font-semibold uppercase tracking-wide text-brand-accent backdrop-blur">
+                    {section}
+                  </h3>
+                )}
+                {items.map((question) => (
+                  <QuestionField
+                    key={question.id}
+                    question={question}
+                    hideHelpText={Boolean(section)}
+                    value={values[question.id] ?? ""}
+                    onChange={(value) => setValues((prev) => ({ ...prev, [question.id]: value }))}
+                  />
+                ))}
+              </section>
             ))}
             {questions.length === 0 && (
               <p className="text-sm text-brand-muted">This template has no questions yet.</p>
@@ -135,14 +145,27 @@ export function NeedsAnalysisDialog({
   );
 }
 
+function groupBySection(questions: QuestionRow[]): [string, QuestionRow[]][] {
+  const groups = new Map<string, QuestionRow[]>();
+  for (const question of questions) {
+    const key = question.help_text?.trim() ?? "";
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(question);
+    else groups.set(key, [question]);
+  }
+  return [...groups.entries()];
+}
+
 function QuestionField({
   question,
   value,
   onChange,
+  hideHelpText,
 }: {
   question: QuestionRow;
   value: string;
   onChange: (value: string) => void;
+  hideHelpText?: boolean;
 }) {
   const options = optionsOf(question);
   const id = `q-${question.id}`;
@@ -153,7 +176,7 @@ function QuestionField({
         {question.prompt}
         {question.is_required && <span className="ml-1 text-brand-accent">*</span>}
       </Label>
-      {question.help_text && <p className="text-[11px] text-brand-muted">{question.help_text}</p>}
+      {!hideHelpText && question.help_text && <p className="text-[11px] text-brand-muted">{question.help_text}</p>}
 
       {question.input_type === "long_text" ? (
         <Textarea id={id} rows={3} value={value} onChange={(e) => onChange(e.target.value)} />
