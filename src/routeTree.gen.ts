@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedExportRouteImport } from './routes/_authenticated/export'
 import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticated/renewals'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
@@ -49,6 +50,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedExportRoute = AuthenticatedExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
   id: '/pipeline',
   path: '/pipeline',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/export': typeof AuthenticatedExportRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/export': typeof AuthenticatedExportRoute
   '/pipeline': typeof AuthenticatedPipelineRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/export': typeof AuthenticatedExportRoute
   '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/_authenticated/renewals': typeof AuthenticatedRenewalsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/clients'
     | '/dashboard'
+    | '/export'
     | '/pipeline'
     | '/renewals'
     | '/tasks'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/clients'
     | '/dashboard'
+    | '/export'
     | '/pipeline'
     | '/renewals'
     | '/tasks'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/clients'
     | '/_authenticated/dashboard'
+    | '/_authenticated/export'
     | '/_authenticated/pipeline'
     | '/_authenticated/renewals'
     | '/_authenticated/tasks'
@@ -194,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/export': {
+      id: '/_authenticated/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof AuthenticatedExportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/pipeline': {
       id: '/_authenticated/pipeline'
       path: '/pipeline'
@@ -229,6 +248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedExportRoute: typeof AuthenticatedExportRoute
   AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
   AuthenticatedRenewalsRoute: typeof AuthenticatedRenewalsRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
@@ -238,6 +258,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedExportRoute: AuthenticatedExportRoute,
   AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
   AuthenticatedRenewalsRoute: AuthenticatedRenewalsRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,

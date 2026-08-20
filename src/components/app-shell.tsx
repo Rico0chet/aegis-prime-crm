@@ -27,6 +27,7 @@ const navigation = [
   { label: "Client Registry", to: "/clients", icon: Users },
   { label: "Follow-ups", to: "/tasks", icon: BarChart3 },
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
+  { label: "Data Export", to: "/export", icon: FileSpreadsheet },
 ] as const;
 
 const adminNavigation = [{ label: "Admin Portal", to: "/admin", icon: ShieldCheck }] as const;
