@@ -158,6 +158,7 @@ function ClientsPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       }
     >
       <div className="overflow-hidden rounded-xl border border-brand-border bg-brand-card shadow-brand-card">
