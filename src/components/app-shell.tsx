@@ -5,6 +5,7 @@ import {
   BarChart3,
   CalendarDays,
   ClipboardList,
+  FileSpreadsheet,
   LayoutDashboard,
   LogOut,
   Menu,
