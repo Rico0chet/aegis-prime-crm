@@ -100,6 +100,15 @@ function ClientsPage() {
       title="Client Registry"
       eyebrow={`${clients.length} record${clients.length === 1 ? "" : "s"}`}
       actions={
+        <div className="flex items-center gap-2">
+        <IntakeLinkDialog
+          trigger={
+            <Button variant="outline" className="gap-2">
+              <Link2 className="size-4" />
+              <span className="hidden sm:inline">Intake link</span>
+            </Button>
+          }
+        />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-brand-accent text-brand-accent-foreground hover:bg-brand-accent-strong">
