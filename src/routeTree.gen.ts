@@ -20,6 +20,7 @@ import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticated/renewals'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as IntakeTokenRouteImport } from './routes/intake.$token'
 import { Route as QuestionnaireTokenRouteImport } from './routes/questionnaire.$token'
 import { Route as ApiPublicHooksBirthdayEmailsRouteImport } from './routes/api/public/hooks/birthday-emails'
 
@@ -77,6 +78,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const IntakeTokenRoute = IntakeTokenRouteImport.update({
+  id: '/intake/$token',
+  path: '/intake/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestionnaireTokenRoute = QuestionnaireTokenRouteImport.update({
   id: '/questionnaire/$token',
   path: '/questionnaire/$token',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/renewals': typeof AuthenticatedRenewalsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/renewals'
     | '/tasks'
+    | '/intake/$token'
     | '/questionnaire/$token'
     | '/api/public/hooks/birthday-emails'
   fileRoutesByTo: FileRoutesByTo
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/renewals'
     | '/tasks'
+    | '/intake/$token'
     | '/questionnaire/$token'
     | '/api/public/hooks/birthday-emails'
   id:
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/renewals'
     | '/_authenticated/tasks'
+    | '/intake/$token'
     | '/questionnaire/$token'
     | '/api/public/hooks/birthday-emails'
   fileRoutesById: FileRoutesById
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  IntakeTokenRoute: typeof IntakeTokenRoute
   QuestionnaireTokenRoute: typeof QuestionnaireTokenRoute
   ApiPublicHooksBirthdayEmailsRoute: typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/intake/$token': {
+      id: '/intake/$token'
+      path: '/intake/$token'
+      fullPath: '/intake/$token'
+      preLoaderRoute: typeof IntakeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/questionnaire/$token': {
       id: '/questionnaire/$token'
       path: '/questionnaire/$token'
@@ -312,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  IntakeTokenRoute: IntakeTokenRoute,
   QuestionnaireTokenRoute: QuestionnaireTokenRoute,
   ApiPublicHooksBirthdayEmailsRoute: ApiPublicHooksBirthdayEmailsRoute,
 }
