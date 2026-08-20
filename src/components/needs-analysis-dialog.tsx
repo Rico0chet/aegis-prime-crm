@@ -145,14 +145,27 @@ export function NeedsAnalysisDialog({
   );
 }
 
+function groupBySection(questions: QuestionRow[]): [string, QuestionRow[]][] {
+  const groups = new Map<string, QuestionRow[]>();
+  for (const question of questions) {
+    const key = question.help_text?.trim() ?? "";
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(question);
+    else groups.set(key, [question]);
+  }
+  return [...groups.entries()];
+}
+
 function QuestionField({
   question,
   value,
   onChange,
+  hideHelpText,
 }: {
   question: QuestionRow;
   value: string;
   onChange: (value: string) => void;
+  hideHelpText?: boolean;
 }) {
   const options = optionsOf(question);
   const id = `q-${question.id}`;
