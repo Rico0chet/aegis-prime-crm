@@ -206,7 +206,7 @@ export async function buildExportSheets(selected: ExportDataset[]) {
             _sort: question?.sort_order ?? 0,
           } as Row & { _sort: number };
         })
-        .sort((a, b) => String(a.Client).localeCompare(String(b.Client)) || a._sort - b._sort)
+        .sort((a, b) => String(a["Client"]).localeCompare(String(b["Client"])) || a._sort - b._sort)
         .map(({ _sort: _ignored, ...rest }) => rest),
     });
   }
