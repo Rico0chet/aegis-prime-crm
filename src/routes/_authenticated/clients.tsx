@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ClipboardCheck, Pencil, Plus, Send, Trash2 } from "lucide-react";
+import { ClipboardCheck, Link2, Pencil, Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
 import { EditClientDialog } from "@/components/edit-client-dialog";
+import { IntakeLinkDialog } from "@/components/intake-link-dialog";
 import { NeedsAnalysisDialog } from "@/components/needs-analysis-dialog";
 import { ShareAnalysisDialog } from "@/components/share-analysis-dialog";
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,15 @@ function ClientsPage() {
       title="Client Registry"
       eyebrow={`${clients.length} record${clients.length === 1 ? "" : "s"}`}
       actions={
+        <div className="flex items-center gap-2">
+        <IntakeLinkDialog
+          trigger={
+            <Button variant="outline" className="gap-2">
+              <Link2 className="size-4" />
+              <span className="hidden sm:inline">Intake link</span>
+            </Button>
+          }
+        />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-brand-accent text-brand-accent-foreground hover:bg-brand-accent-strong">
@@ -148,6 +158,7 @@ function ClientsPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       }
     >
       <div className="overflow-hidden rounded-xl border border-brand-border bg-brand-card shadow-brand-card">

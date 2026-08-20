@@ -161,6 +161,39 @@ export type Database = {
         }
         Relationships: []
       }
+      intake_links: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string | null
+          submission_count: number
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          submission_count?: number
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          submission_count?: number
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       needs_analysis_answers: {
         Row: {
           analysis_id: string
