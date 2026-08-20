@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ClipboardCheck, Plus, Trash2 } from "lucide-react";
+import { ClipboardCheck, Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
 import { NeedsAnalysisDialog } from "@/components/needs-analysis-dialog";
+import { ShareAnalysisDialog } from "@/components/share-analysis-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -200,6 +201,21 @@ function ClientsPage() {
                     >
                       <ClipboardCheck className="size-4" />
                       <span className="hidden lg:inline">Needs analysis</span>
+                    </Button>
+                  }
+                />
+                <ShareAnalysisDialog
+                  clientId={client.id}
+                  clientName={`${client.first_name} ${client.last_name}`}
+                  trigger={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      aria-label={`Send questionnaire link to ${client.first_name} ${client.last_name}`}
+                    >
+                      <Send className="size-4" />
+                      <span className="hidden lg:inline">Send link</span>
                     </Button>
                   }
                 />
