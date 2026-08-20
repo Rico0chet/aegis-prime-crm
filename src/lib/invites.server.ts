@@ -33,6 +33,7 @@ export type LoadedInvite = {
   template_id: string;
   analysis_id: string | null;
   expires_at: string;
+  opened_at: string | null;
   submitted_at: string | null;
   revoked_at: string | null;
 };
@@ -42,7 +43,7 @@ export async function loadInvite(token: string): Promise<LoadedInvite> {
   const supabaseAdmin = await getAdminClient();
   const { data, error } = await supabaseAdmin
     .from("needs_analysis_invites")
-    .select("id, user_id, client_id, template_id, analysis_id, expires_at, submitted_at, revoked_at")
+    .select("id, user_id, client_id, template_id, analysis_id, expires_at, opened_at, submitted_at, revoked_at")
     .eq("token", token)
     .maybeSingle();
 
@@ -73,23 +74,23 @@ export function toPublicQuestions(rows: QuestionRow[]): PublicQuestion[] {
 export function contactPatchFromAnswers(
   questions: PublicQuestion[],
   values: Record<string, string>,
-): Record<string, string> {
-  const patch: Record<string, string> = {};
+): { email?: string; phone?: string; date_of_birth?: string } {
+  const patch: { email?: string; phone?: string; date_of_birth?: string } = {};
   for (const question of questions) {
     const value = (values[question.id] ?? "").trim();
     if (!value) continue;
     const prompt = question.prompt.toLowerCase();
-    if (!patch["email"] && question.input_type !== "long_text" && /e-?mail/.test(prompt) && value.includes("@")) {
-      patch["email"] = value;
-    } else if (!patch["phone"] && /(phone|mobile|cell)/.test(prompt) && /\d{7}/.test(value.replace(/\D/g, ""))) {
-      patch["phone"] = value;
+    if (!patch.email && question.input_type !== "long_text" && /e-?mail/.test(prompt) && value.includes("@")) {
+      patch.email = value;
+    } else if (!patch.phone && /(phone|mobile|cell)/.test(prompt) && /\d{7}/.test(value.replace(/\D/g, ""))) {
+      patch.phone = value;
     } else if (
-      !patch["date_of_birth"] &&
+      !patch.date_of_birth &&
       question.input_type === "date" &&
       /(date of birth|birth ?date|dob\b)/.test(prompt) &&
       /^\d{4}-\d{2}-\d{2}$/.test(value)
     ) {
-      patch["date_of_birth"] = value;
+      patch.date_of_birth = value;
     }
   }
   return patch;
