@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { ClipboardCheck, Plus, Send, Trash2 } from "lucide-react";
+import { ClipboardCheck, Pencil, Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
+import { EditClientDialog } from "@/components/edit-client-dialog";
 import { NeedsAnalysisDialog } from "@/components/needs-analysis-dialog";
 import { ShareAnalysisDialog } from "@/components/share-analysis-dialog";
 import { Button } from "@/components/ui/button";
