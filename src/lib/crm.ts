@@ -93,7 +93,7 @@ export function useProfile() {
       if (!userData.user) return null;
       const { data } = await supabase
         .from("profiles")
-        .select("id, full_name, agency, license_number")
+        .select("id, full_name, agency, license_number, avatar_url")
         .eq("id", userData.user.id)
         .maybeSingle();
       return (
@@ -102,6 +102,7 @@ export function useProfile() {
           full_name: (userData.user.email ?? "Producer").split("@")[0] ?? null,
           agency: null,
           license_number: null,
+          avatar_url: null,
         }
       );
     },
