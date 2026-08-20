@@ -176,7 +176,7 @@ function QuestionField({
         {question.prompt}
         {question.is_required && <span className="ml-1 text-brand-accent">*</span>}
       </Label>
-      {question.help_text && <p className="text-[11px] text-brand-muted">{question.help_text}</p>}
+      {!hideHelpText && question.help_text && <p className="text-[11px] text-brand-muted">{question.help_text}</p>}
 
       {question.input_type === "long_text" ? (
         <Textarea id={id} rows={3} value={value} onChange={(e) => onChange(e.target.value)} />
