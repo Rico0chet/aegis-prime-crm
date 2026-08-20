@@ -206,6 +206,73 @@ export type Database = {
           },
         ]
       }
+      needs_analysis_invites: {
+        Row: {
+          analysis_id: string | null
+          client_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          opened_at: string | null
+          revoked_at: string | null
+          submitted_at: string | null
+          template_id: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_id?: string | null
+          client_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          opened_at?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template_id: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis_id?: string | null
+          client_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          opened_at?: string | null
+          revoked_at?: string | null
+          submitted_at?: string | null
+          template_id?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "needs_analysis_invites_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "client_needs_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "needs_analysis_invites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "needs_analysis_invites_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "needs_analysis_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       needs_analysis_questions: {
         Row: {
           created_at: string
