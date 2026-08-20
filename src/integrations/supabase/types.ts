@@ -418,30 +418,99 @@ export type Database = {
           },
         ]
       }
+      producer_licenses: {
+        Row: {
+          created_at: string
+          expires_on: string | null
+          id: string
+          is_active: boolean
+          issued_on: string | null
+          license_number: string
+          lines_of_authority: string | null
+          notes: string | null
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          is_active?: boolean
+          issued_on?: string | null
+          license_number: string
+          lines_of_authority?: string | null
+          notes?: string | null
+          state: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          is_active?: boolean
+          issued_on?: string | null
+          license_number?: string
+          lines_of_authority?: string | null
+          notes?: string | null
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           agency: string | null
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           full_name: string | null
           id: string
           license_number: string | null
+          linkedin_url: string | null
+          nipr_url: string | null
+          npn: string | null
+          phone: string | null
+          surelc_url: string | null
+          title: string | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           agency?: string | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id: string
           license_number?: string | null
+          linkedin_url?: string | null
+          nipr_url?: string | null
+          npn?: string | null
+          phone?: string | null
+          surelc_url?: string | null
+          title?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           agency?: string | null
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           license_number?: string | null
+          linkedin_url?: string | null
+          nipr_url?: string | null
+          npn?: string | null
+          phone?: string | null
+          surelc_url?: string | null
+          title?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
