@@ -81,10 +81,19 @@ function OAuthReturn() {
         handOff("appUserConnectorOAuthFailed");
         return;
       }
+      // The exchange code is single-use: guard against React StrictMode's
+      // double effect and against a manual page refresh re-running it.
+      const guardKey = `aegis-oauth-code:${code}`;
+      if (sessionStorage.getItem(guardKey)) {
+        handOff("appUserConnectorOAuthComplete");
+        return;
+      }
+      sessionStorage.setItem(guardKey, "1");
       try {
         await completeConnect({ data: { code, handoff } });
         handOff("appUserConnectorOAuthComplete");
       } catch (error) {
+        sessionStorage.removeItem(guardKey);
         setMessage(error instanceof Error ? error.message : "The calendar connection failed.");
         handOff("appUserConnectorOAuthFailed");
       }
