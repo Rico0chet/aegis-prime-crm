@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertProducerActive } from "@/lib/entitlement.server";
 import { getRequest } from "@tanstack/react-start/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
@@ -101,6 +102,7 @@ async function loadSettingsBySlug(slug: string): Promise<BookingSettingsRow> {
     throw new Error("This booking page could not be opened.");
   }
   if (!data || !data.is_enabled) throw new Error("This booking page is not available.");
+  await assertProducerActive(data.user_id);
   return data as BookingSettingsRow;
 }
 
