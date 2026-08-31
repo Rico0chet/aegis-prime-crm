@@ -116,32 +116,62 @@ function waitForOAuthCompletion(popup: Window) {
 /** Fallback used when the browser (or the embedded preview) blocks popups. */
 function waitForOAuthCompletionFromAnyWindow() {
   return new Promise<string | null>((resolve, reject) => {
+    const startedAt = Date.now();
+    clearStoredOAuthOutcome();
     let timeout: number | undefined;
+    let poll: number | undefined;
+    let channel: BroadcastChannel | null = null;
     const cleanup = () => {
       window.removeEventListener("message", onMessage);
       if (timeout !== undefined) window.clearTimeout(timeout);
+      if (poll !== undefined) window.clearInterval(poll);
+      try {
+        channel?.close();
+      } catch {
+        /* ignore */
+      }
     };
-    const onMessage = (event: MessageEvent) => {
-      const type = event.data?.type;
-      if (
-        event.data?.connectorId !== "google_calendar" ||
-        (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
-      )
-        return;
+    const settle = (data: { type?: string; code?: unknown }) => {
       cleanup();
-      if (type === "appUserConnectorOAuthComplete") {
-        resolve(typeof event.data?.code === "string" ? event.data.code : null);
+      if (data.type === "appUserConnectorOAuthComplete") {
+        resolve(typeof data.code === "string" ? data.code : null);
         return;
       }
       reject(new Error("The calendar connection failed."));
     };
+    const accepts = (data: { type?: string; connectorId?: string }) =>
+      data?.connectorId === "google_calendar" &&
+      (data.type === "appUserConnectorOAuthComplete" ||
+        data.type === "appUserConnectorOAuthFailed");
+
+    const onMessage = (event: MessageEvent) => {
+      if (accepts(event.data ?? {})) settle(event.data);
+    };
     window.addEventListener("message", onMessage);
+
+    try {
+      channel = new BroadcastChannel(OAUTH_CHANNEL);
+      channel.onmessage = (event) => {
+        if (accepts(event.data ?? {})) settle(event.data);
+      };
+    } catch {
+      /* BroadcastChannel unavailable */
+    }
+
+    // localStorage poll: covers browsers/tabs where BroadcastChannel and
+    // postMessage both miss (standalone tab opened from a copied link).
+    poll = window.setInterval(() => {
+      const stored = takeStoredOAuthOutcome(startedAt);
+      if (stored) settle(stored);
+    }, 800);
+
     timeout = window.setTimeout(() => {
       cleanup();
       reject(new Error("Timed out waiting for Google. Try the connect link again."));
     }, 10 * 60 * 1000);
   });
 }
+
 
 function BookingAdminPage() {
   const queryClient = useQueryClient();
