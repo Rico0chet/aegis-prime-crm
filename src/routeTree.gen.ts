@@ -20,6 +20,7 @@ import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticated/renewals'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as BookIndexRouteImport } from './routes/book/index'
 import { Route as IntakeTokenRouteImport } from './routes/intake.$token'
 import { Route as QuestionnaireTokenRouteImport } from './routes/questionnaire.$token'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
@@ -79,6 +80,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const BookIndexRoute = BookIndexRouteImport.update({
+  id: '/book/',
+  path: '/book/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakeTokenRoute = IntakeTokenRouteImport.update({
   id: '/intake/$token',
   path: '/intake/$token',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/book/': typeof BookIndexRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/book': typeof BookIndexRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/book/': typeof BookIndexRoute
   '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/book/'
     | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   fileRoutesByTo: FileRoutesByTo
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/book'
     | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   id:
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/book/'
     | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   fileRoutesById: FileRoutesById
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   IntakeTokenRoute: typeof IntakeTokenRoute
   QuestionnaireTokenRoute: typeof QuestionnaireTokenRoute
+  BookIndexRoute: typeof BookIndexRoute
   OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicHooksBirthdayEmailsRoute: typeof ApiPublicHooksBirthdayEmailsRoute
 }
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/book/': {
+      id: '/book/'
+      path: '/book'
+      fullPath: '/book/'
+      preLoaderRoute: typeof BookIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intake/$token': {
       id: '/intake/$token'
       path: '/intake/$token'
@@ -355,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   IntakeTokenRoute: IntakeTokenRoute,
   QuestionnaireTokenRoute: QuestionnaireTokenRoute,
+  BookIndexRoute: BookIndexRoute,
   OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicHooksBirthdayEmailsRoute: ApiPublicHooksBirthdayEmailsRoute,
 }
