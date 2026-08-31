@@ -193,7 +193,11 @@ function BookingAdminPage() {
 
   const connectMutation = useMutation({
     mutationFn: async () => {
-      const popup = window.open("", "lovable-oauth", "width=600,height=720");
+      // Inside the editor preview the app runs in a sandboxed iframe, where
+      // Google's consent page is refused (ERR_BLOCKED_BY_RESPONSE). Skip the
+      // popup there and hand the user a real new-tab link instead.
+      const inIframe = window.self !== window.top;
+      const popup = inIframe ? null : window.open("", "lovable-oauth", "width=600,height=720");
       let code: string | null = null;
       try {
         const { authorizationUrl } = await startConnect();
@@ -202,8 +206,7 @@ function BookingAdminPage() {
           popup.location.href = authorizationUrl;
           code = await completion;
         } else {
-          // Popups are blocked (common inside the embedded preview frame):
-          // surface a link the user can open manually in a new tab.
+          // No popup available: surface a link the user opens in a new tab.
           setFallbackUrl(authorizationUrl);
           code = await waitForOAuthCompletionFromAnyWindow();
         }
@@ -273,19 +276,31 @@ function BookingAdminPage() {
         </div>
         {!connected && fallbackUrl ? (
           <div className="mt-4 rounded-lg border border-brand-border bg-brand-bg p-4 text-sm">
-            <p className="font-medium">Your browser blocked the popup window.</p>
+            <p className="font-medium">Finish in a new browser tab</p>
             <p className="mt-1 text-brand-muted">
-              Open Google authorization in a new tab instead — this page will finish the connection
-              automatically once you approve.
+              Google blocks its sign-in page inside embedded previews. Open the authorization link
+              below in a new tab — this page finishes the connection automatically once you approve.
+              If nothing happens, open the app in its own browser tab and connect from there.
             </p>
-            <a
-              href={fallbackUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
-            >
-              <ExternalLink className="size-4" /> Open Google authorization
-            </a>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <a
+                href={fallbackUrl}
+                target="_blank"
+                className="inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
+              >
+                <ExternalLink className="size-4" /> Open Google authorization
+              </a>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(fallbackUrl);
+                  toast.success("Authorization link copied");
+                }}
+              >
+                <Copy className="size-4" /> Copy link
+              </Button>
+            </div>
           </div>
         ) : null}
       </section>
