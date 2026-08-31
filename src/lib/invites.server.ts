@@ -1,3 +1,4 @@
+import { assertProducerActive } from "@/lib/entitlement.server";
 import type { Database } from "@/integrations/supabase/types";
 
 type QuestionRow = Database["public"]["Tables"]["needs_analysis_questions"]["Row"];
@@ -56,6 +57,7 @@ export async function loadInvite(token: string): Promise<LoadedInvite> {
   if (new Date(data.expires_at).getTime() < Date.now()) {
     throw new Error("This questionnaire link has expired. Ask your advisor for a new one.");
   }
+  await assertProducerActive(data.user_id);
   return data as LoadedInvite;
 }
 

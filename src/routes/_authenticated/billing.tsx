@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Copy, CreditCard, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Copy, CreditCard, ExternalLink, Receipt, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
@@ -13,6 +13,7 @@ import {
   formatMoney,
   useAccessState,
   useBillingSettings,
+  useBillingTransactions,
 } from "@/lib/billing";
 
 export const Route = createFileRoute("/_authenticated/billing")({
@@ -37,9 +38,11 @@ export const Route = createFileRoute("/_authenticated/billing")({
 });
 
 function BillingPage() {
-  const { account, subscription, comped, trialing, paid, daysLeft, loading } = useAccessState();
+  const { account, subscription, comped, trialing, paid, daysLeft, loading, pastDue, cancelAtPeriodEnd } =
+    useAccessState();
   const { data: settings } = useBillingSettings();
-  const { openCheckout, loading: checkoutLoading } = usePaddleCheckout();
+  const { data: transactions = [] } = useBillingTransactions();
+  const { openCheckout, openPortal, loading: checkoutLoading } = usePaddleCheckout();
   const [starting, setStarting] = useState(false);
 
   const price = effectivePriceCents(account, settings);
@@ -62,6 +65,14 @@ function BillingPage() {
     }
   }
 
+  async function handlePortal() {
+    try {
+      await openPortal();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not open the billing portal");
+    }
+  }
+
   const referralLink =
     typeof window !== "undefined" && account
       ? `${window.location.origin}/auth?ref=${account.referral_code}`
@@ -70,6 +81,25 @@ function BillingPage() {
   return (
     <AppShell title="Subscription" eyebrow="Billing & plan">
       <PaymentTestModeBanner />
+
+      {pastDue && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
+          <AlertTriangle className="size-4 text-amber-500" />
+          <span>
+            Your last payment failed. Update your card to keep your account from being suspended.
+          </span>
+          <Button size="sm" variant="outline" onClick={handlePortal}>
+            Update payment method
+          </Button>
+        </div>
+      )}
+
+      {cancelAtPeriodEnd && subscription?.current_period_end && (
+        <div className="rounded-xl border border-brand-border bg-brand-card p-4 text-sm text-brand-muted">
+          Your subscription is set to cancel. You keep full access until{" "}
+          {new Date(subscription.current_period_end).toLocaleDateString()}.
+        </div>
+      )}
 
       <section className="rounded-xl border border-brand-border bg-brand-card p-6 shadow-brand-card">
         <div className="flex flex-wrap items-start justify-between gap-6">
@@ -110,16 +140,25 @@ function BillingPage() {
           </div>
         </div>
 
-        {!comped && !paid && (
-          <Button
-            className="mt-6"
-            onClick={handleSubscribe}
-            disabled={starting || checkoutLoading}
-          >
-            <CreditCard className="mr-2 size-4" />
-            {starting || checkoutLoading ? "Opening checkout…" : "Subscribe now"}
-          </Button>
-        )}
+        <div className="mt-6 flex flex-wrap gap-3">
+          {!comped && !paid && (
+            <Button onClick={handleSubscribe} disabled={starting || checkoutLoading}>
+              <CreditCard className="mr-2 size-4" />
+              {starting || checkoutLoading ? "Opening checkout…" : "Subscribe now"}
+            </Button>
+          )}
+          {paid && (
+            <Button variant="outline" onClick={handlePortal} disabled={checkoutLoading}>
+              <ExternalLink className="mr-2 size-4" />
+              Manage subscription
+            </Button>
+          )}
+          {comped && (
+            <p className="text-sm text-brand-muted">
+              No payment method is needed while your access is complimentary.
+            </p>
+          )}
+        </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">
@@ -169,6 +208,29 @@ function BillingPage() {
             </Button>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-brand-border bg-brand-card p-6 shadow-brand-card">
+        <h3 className="flex items-center gap-2 text-sm font-semibold">
+          <Receipt className="size-4 text-brand-accent" /> Payment history
+        </h3>
+        {transactions.length === 0 ? (
+          <p className="mt-3 text-sm text-brand-muted">No payments recorded yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-brand-border text-sm">
+            {transactions.map((tx) => (
+              <li key={tx.id} className="flex items-center justify-between py-2">
+                <span className="text-brand-muted">
+                  {tx.occurred_at ? new Date(tx.occurred_at).toLocaleDateString() : "—"}
+                </span>
+                <span className="capitalize text-brand-muted">{tx.status.replace("_", " ")}</span>
+                <span className="font-semibold">
+                  {tx.amount_cents != null ? formatMoney(tx.amount_cents) : "—"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </AppShell>
   );

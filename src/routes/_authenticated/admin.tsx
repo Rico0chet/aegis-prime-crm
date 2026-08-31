@@ -46,6 +46,8 @@ import {
   type AccessMode,
   type BillingProducer,
 } from "@/lib/billing";
+import { getPaddleEnvironment } from "@/lib/paddle";
+import { syncBasePrice } from "@/utils/payments.functions";
 
 import {
   CLIENT_STATUSES,
@@ -636,6 +638,7 @@ function BillingPanel() {
   const [basePrice, setBasePrice] = useState("");
   const [referralPercent, setReferralPercent] = useState("");
   const [trialDays, setTrialDays] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
 
   useEffect(() => {
     if (!settings) return;
@@ -675,25 +678,42 @@ function BillingPanel() {
         </div>
         <div className="border-t border-brand-border p-5">
           <Button
-            onClick={() =>
-              updateSettings.mutate(
-                {
-                  base_price_cents: Math.round(Number(basePrice || 0) * 100),
-                  referral_discount_percent: Math.round(Number(referralPercent || 0)),
-                  trial_days: Math.round(Number(trialDays || 0)),
-                },
-                {
-                  onSuccess: () => toast.success("Plan settings saved"),
-                  onError: (error) => toast.error(error.message),
-                },
-              )
-            }
+            disabled={savingPrice}
+            onClick={async () => {
+              const cents = Math.round(Number(basePrice || 0) * 100);
+              if (!Number.isFinite(cents) || cents < 70) {
+                toast.error("The monthly price must be at least $0.70.");
+                return;
+              }
+              setSavingPrice(true);
+              try {
+                await syncBasePrice({
+                  data: { environment: getPaddleEnvironment(), amountCents: cents },
+                });
+                updateSettings.mutate(
+                  {
+                    base_price_cents: cents,
+                    referral_discount_percent: Math.round(Number(referralPercent || 0)),
+                    trial_days: Math.round(Number(trialDays || 0)),
+                  },
+                  {
+                    onSuccess: () => toast.success("Plan settings saved and checkout price updated"),
+                    onError: (error) => toast.error(error.message),
+                  },
+                );
+              } catch (error) {
+                toast.error(
+                  error instanceof Error ? error.message : "Could not update the checkout price",
+                );
+              } finally {
+                setSavingPrice(false);
+              }
+            }}
           >
-            Save plan settings
+            {savingPrice ? "Saving…" : "Save plan settings"}
           </Button>
           <p className="mt-2 text-xs text-brand-muted">
-            Changing the standard price here updates what producers see. Ask your builder to update
-            the checkout price to match.
+            Saving here also updates the real checkout price charged to new subscribers.
           </p>
         </div>
       </Panel>

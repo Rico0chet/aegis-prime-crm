@@ -37,7 +37,7 @@ export async function initializePaddle() {
   });
 }
 
-export async function getPaddlePriceId(priceId: string): Promise<string> {
-  const environment = getPaddleEnvironment();
-  return resolvePaddlePrice({ data: { priceId, environment } });
+export async function getPaddlePriceId(): Promise<string> {
+  return resolvePaddlePrice({ data: { environment: getPaddleEnvironment() } });
 }
+

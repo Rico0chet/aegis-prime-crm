@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 export type BillingAccount = Database["public"]["Tables"]["billing_accounts"]["Row"];
 export type BillingSettings = Database["public"]["Tables"]["billing_settings"]["Row"];
 export type SubscriptionRow = Database["public"]["Tables"]["subscriptions"]["Row"];
+export type BillingTransaction = Database["public"]["Tables"]["billing_transactions"]["Row"];
 
 export type AccessMode = "trial" | "paid" | "free";
 
@@ -86,6 +87,25 @@ export function useSubscription() {
   });
 }
 
+export function useBillingTransactions() {
+  return useQuery({
+    queryKey: ["billing-transactions"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return [];
+      const { data, error } = await supabase
+        .from("billing_transactions")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .eq("environment", getPaddleEnvironment())
+        .order("occurred_at", { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      return (data ?? []) as BillingTransaction[];
+    },
+  });
+}
+
 export function subscriptionIsActive(sub: SubscriptionRow | null | undefined) {
   if (!sub) return false;
   const end = sub.current_period_end ? new Date(sub.current_period_end).getTime() : null;
@@ -111,6 +131,8 @@ export function useAccessState() {
   return {
     loading,
     hasAccess: comped || trialing || paid,
+    pastDue: subscription.data?.status === "past_due",
+    cancelAtPeriodEnd: Boolean(subscription.data?.cancel_at_period_end),
     comped,
     trialing,
     paid,

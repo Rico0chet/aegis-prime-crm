@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { initializePaddle, getPaddleEnvironment } from "@/lib/paddle";
-import { resolveCheckoutOffer } from "@/utils/payments.functions";
+import { createPortalSession, resolveCheckoutOffer } from "@/utils/payments.functions";
 
 export function usePaddleCheckout() {
   const [loading, setLoading] = useState(false);
@@ -12,10 +12,13 @@ export function usePaddleCheckout() {
   }) => {
     setLoading(true);
     try {
-      await initializePaddle();
       const environment = getPaddleEnvironment();
       const offer = await resolveCheckoutOffer({ data: { environment } });
+      if (offer.blocked || !offer.paddlePriceId) {
+        throw new Error(offer.reason ?? "Checkout is not available for this account.");
+      }
 
+      await initializePaddle();
       window.Paddle.Checkout.open({
         items: [{ priceId: offer.paddlePriceId, quantity: 1 }],
         ...(offer.discountId ? { discountId: offer.discountId } : {}),
@@ -25,6 +28,7 @@ export function usePaddleCheckout() {
           displayMode: "overlay",
           successUrl: options.successUrl ?? `${window.location.origin}/billing?checkout=success`,
           allowLogout: false,
+          showAddDiscounts: false,
           variant: "one-page",
         },
       });
@@ -33,5 +37,15 @@ export function usePaddleCheckout() {
     }
   };
 
-  return { openCheckout, loading };
+  const openPortal = async () => {
+    setLoading(true);
+    try {
+      const { url } = await createPortalSession({ data: { environment: getPaddleEnvironment() } });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { openCheckout, openPortal, loading };
 }

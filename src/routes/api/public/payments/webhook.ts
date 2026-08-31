@@ -15,6 +15,22 @@ function getSupabase() {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolveUserId(data: any, env: PaddleEnv): Promise<string | null> {
+  if (data?.customData?.userId) return String(data.customData.userId);
+  const subscriptionId = data?.subscriptionId ?? data?.id;
+  if (subscriptionId) {
+    const { data: row } = await getSupabase()
+      .from("subscriptions")
+      .select("user_id")
+      .eq("paddle_subscription_id", subscriptionId)
+      .eq("environment", env)
+      .maybeSingle();
+    if (row?.user_id) return row.user_id;
+  }
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
   const { id, customerId, items, status, currentBillingPeriod, customData } = data;
 
@@ -53,7 +69,12 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
       { onConflict: "paddle_subscription_id" },
     );
 
-  await getSupabase().from("billing_accounts").update({ access_mode: "paid" }).eq("user_id", userId);
+  // Only flip a trialing account to paid — never downgrade a comped account.
+  await getSupabase()
+    .from("billing_accounts")
+    .update({ access_mode: "paid" })
+    .eq("user_id", userId)
+    .neq("access_mode", "free");
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,11 +96,47 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
+  // Access is kept until current_period_end (handled by the access check),
+  // so we only record the cancellation here.
   await getSupabase()
     .from("subscriptions")
     .update({ status: "canceled", updated_at: new Date().toISOString() })
     .eq("paddle_subscription_id", data.id)
     .eq("environment", env);
+
+  const userId = await resolveUserId(data, env);
+  if (userId) {
+    // Return the account to the standard (unpaid) state so admin views and the
+    // paywall reflect reality once the paid period runs out.
+    await getSupabase()
+      .from("billing_accounts")
+      .update({ access_mode: "trial" })
+      .eq("user_id", userId)
+      .eq("access_mode", "paid");
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function recordTransaction(data: any, env: PaddleEnv, status: string) {
+  const userId = await resolveUserId(data, env);
+  const total = data?.details?.totals?.total ?? data?.details?.totals?.grandTotal;
+
+  await getSupabase()
+    .from("billing_transactions")
+    .upsert(
+      {
+        user_id: userId,
+        paddle_transaction_id: data.id,
+        paddle_subscription_id: data.subscriptionId ?? null,
+        status,
+        amount_cents: total != null ? Number(total) : null,
+        currency_code: data?.currencyCode ?? null,
+        occurred_at: data?.billedAt ?? data?.updatedAt ?? new Date().toISOString(),
+        environment: env,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "paddle_transaction_id,environment" },
+    );
 }
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
@@ -94,6 +151,12 @@ async function handleWebhook(req: Request, env: PaddleEnv) {
       break;
     case EventName.SubscriptionCanceled:
       await handleSubscriptionCanceled(event.data, env);
+      break;
+    case EventName.TransactionCompleted:
+      await recordTransaction(event.data, env, "completed");
+      break;
+    case EventName.TransactionPaymentFailed:
+      await recordTransaction(event.data, env, "payment_failed");
       break;
     default:
       console.log("Unhandled event:", event.eventType);

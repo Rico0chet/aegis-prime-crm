@@ -1,3 +1,4 @@
+import { assertProducerActive } from "@/lib/entitlement.server";
 export type PublicIntake = {
   advisorName: string;
   agency: string | null;
@@ -32,6 +33,7 @@ export async function loadIntakeLink(token: string): Promise<LoadedIntakeLink> {
   }
   if (!data) throw new Error("This intake link is not valid.");
   if (!data.is_active) throw new Error("This intake link is no longer accepting submissions.");
+  await assertProducerActive(data.user_id);
   return data as LoadedIntakeLink;
 }
 
