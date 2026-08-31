@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
@@ -35,6 +36,55 @@ const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/calendar.events",
   "https://www.googleapis.com/auth/calendar.readonly",
 ];
+
+const CALENDAR_HANDOFF_TTL_MS = 15 * 60 * 1000;
+
+function calendarHandoffSecret() {
+  const secret = process.env["APP_USER_CONNECTION_KEY_SECRET"];
+  if (!secret) throw new Error("Calendar connection security is not configured.");
+  return secret;
+}
+
+function createCalendarHandoff(userId: string) {
+  const payload = Buffer.from(
+    JSON.stringify({ userId, expiresAt: Date.now() + CALENDAR_HANDOFF_TTL_MS }),
+  ).toString("base64url");
+  const signature = createHmac("sha256", calendarHandoffSecret())
+    .update(`calendar:${payload}`)
+    .digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function readCalendarHandoff(handoff: string) {
+  const [payload, signature, extra] = handoff.split(".");
+  if (!payload || !signature || extra) throw new Error("This calendar connection link is invalid.");
+  const expected = createHmac("sha256", calendarHandoffSecret())
+    .update(`calendar:${payload}`)
+    .digest();
+  let received: Buffer;
+  try {
+    received = Buffer.from(signature, "base64url");
+  } catch {
+    throw new Error("This calendar connection link is invalid.");
+  }
+  if (received.length !== expected.length || !timingSafeEqual(received, expected)) {
+    throw new Error("This calendar connection link is invalid.");
+  }
+  let parsed: { userId?: unknown; expiresAt?: unknown };
+  try {
+    parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+  } catch {
+    throw new Error("This calendar connection link is invalid.");
+  }
+  if (
+    typeof parsed.userId !== "string" ||
+    typeof parsed.expiresAt !== "number" ||
+    parsed.expiresAt < Date.now()
+  ) {
+    throw new Error("This calendar connection link has expired. Start again from Booking.");
+  }
+  return parsed.userId;
+}
 
 const SETTINGS_COLUMNS =
   "user_id, slug, is_enabled, calendar_provider, headline, intro, timezone, work_days, start_time, end_time, slot_minutes, buffer_minutes, lead_hours, horizon_days";
@@ -358,7 +408,8 @@ export const startCalendarConnect = createServerFn({ method: "POST" })
     const returnUrl = new URL(
       "/oauth/google-calendar/return",
       sandboxHost ? `https://${sandboxHost}` : url.origin,
-    ).toString();
+    );
+    returnUrl.searchParams.set("handoff", createCalendarHandoff(context.userId));
 
     const existing = await getConnectionKeyForUser(context.userId, CALENDAR_CONNECTOR_ID);
     const { authorizationUrl } = await authorizeAppUserOAuth({
@@ -366,7 +417,7 @@ export const startCalendarConnect = createServerFn({ method: "POST" })
       connectorId: CALENDAR_CONNECTOR_ID,
       appUserId: context.userId,
       clientAPIKey,
-      returnUrl,
+      returnUrl: returnUrl.toString(),
       ...(existing ? { connectionAPIKey: existing } : {}),
       credentialsConfiguration: { scopes: GOOGLE_SCOPES },
     });
@@ -385,6 +436,29 @@ export const completeCalendarConnection = createServerFn({ method: "POST" })
       throw new Error("OAuth completion returned the wrong connector.");
     }
     await saveConnectionKeyForUser(context.userId, connectorId, connectionAPIKey);
+    return { ok: true as const };
+  });
+
+/**
+ * Completes OAuth from the standalone return tab. The signed, short-lived
+ * handoff identifies the producer without relying on browser storage or on
+ * the popup inheriting the embedded preview's authenticated session.
+ */
+export const completeCalendarConnectionFromReturn = createServerFn({ method: "POST" })
+  .inputValidator((input: { code: string; handoff: string }) => ({
+    code: cleanText(input.code, 512),
+    handoff: cleanText(input.handoff, 2048),
+  }))
+  .handler(async ({ data }) => {
+    const userId = readCalendarHandoff(data.handoff);
+    const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
+      GATEWAY_BASE_URL,
+      data.code,
+    );
+    if (connectorId !== CALENDAR_CONNECTOR_ID) {
+      throw new Error("OAuth completion returned the wrong connector.");
+    }
+    await saveConnectionKeyForUser(userId, connectorId, connectionAPIKey);
     return { ok: true as const };
   });
 

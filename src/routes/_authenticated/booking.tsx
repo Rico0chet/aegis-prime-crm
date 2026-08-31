@@ -177,6 +177,29 @@ function waitForOAuthCompletionFromAnyWindow() {
   });
 }
 
+function waitForCalendarConnection(
+  loadSettings: () => Promise<{ calendarConnected: boolean }>,
+) {
+  return new Promise<null>((resolve, reject) => {
+    const startedAt = Date.now();
+    const poll = window.setInterval(async () => {
+      if (Date.now() - startedAt > 10 * 60 * 1000) {
+        window.clearInterval(poll);
+        reject(new Error("Timed out waiting for Google. Start the connection again."));
+        return;
+      }
+      try {
+        const result = await loadSettings();
+        if (!result.calendarConnected) return;
+        window.clearInterval(poll);
+        resolve(null);
+      } catch {
+        // Keep waiting while the user is on Google's authorization screen.
+      }
+    }, 2000);
+  });
+}
+
 
 function BookingAdminPage() {
   const queryClient = useQueryClient();
@@ -243,12 +266,17 @@ function BookingAdminPage() {
         } else {
           // No popup available: surface a link the user opens in a new tab.
           setFallbackUrl(authorizationUrl);
-          code = await waitForOAuthCompletionFromAnyWindow();
+          code = await Promise.race([
+            waitForOAuthCompletionFromAnyWindow(),
+            waitForCalendarConnection(loadSettings),
+          ]);
         }
       } catch (error) {
         popup?.close();
         throw error;
       }
+      // Popup completion still exchanges in this authenticated tab. The
+      // standalone callback exchanges server-side and resolves through polling.
       if (code) await completeConnect({ data: { code } });
     },
     onSuccess: () => {
