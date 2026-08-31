@@ -167,6 +167,9 @@ export type Database = {
           custom_price_cents: number | null
           discount_percent: number
           notes: string | null
+          paddle_discount_env: string | null
+          paddle_discount_id: string | null
+          paddle_discount_key: string | null
           referral_code: string
           referred_by: string | null
           trial_ends_at: string
@@ -179,6 +182,9 @@ export type Database = {
           custom_price_cents?: number | null
           discount_percent?: number
           notes?: string | null
+          paddle_discount_env?: string | null
+          paddle_discount_id?: string | null
+          paddle_discount_key?: string | null
           referral_code: string
           referred_by?: string | null
           trial_ends_at?: string
@@ -191,6 +197,9 @@ export type Database = {
           custom_price_cents?: number | null
           discount_percent?: number
           notes?: string | null
+          paddle_discount_env?: string | null
+          paddle_discount_id?: string | null
+          paddle_discount_key?: string | null
           referral_code?: string
           referred_by?: string | null
           trial_ends_at?: string
@@ -223,6 +232,48 @@ export type Database = {
           referral_discount_percent?: number
           trial_days?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_transactions: {
+        Row: {
+          amount_cents: number | null
+          created_at: string
+          currency_code: string | null
+          environment: string
+          id: string
+          occurred_at: string
+          paddle_subscription_id: string | null
+          paddle_transaction_id: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          created_at?: string
+          currency_code?: string | null
+          environment?: string
+          id?: string
+          occurred_at?: string
+          paddle_subscription_id?: string | null
+          paddle_transaction_id: string
+          status: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          created_at?: string
+          currency_code?: string | null
+          environment?: string
+          id?: string
+          occurred_at?: string
+          paddle_subscription_id?: string | null
+          paddle_transaction_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -902,6 +953,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      producer_has_access: { Args: { user_uuid: string }; Returns: boolean }
     }
     Enums: {
       activity_type: "call" | "email" | "meeting" | "note"
