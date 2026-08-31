@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { broadcastOAuthOutcome, type OAuthHandoffPayload } from "@/lib/oauth-handoff";
 
 export const Route = createFileRoute("/oauth/google-calendar/return")({
   ssr: false,
@@ -18,15 +19,19 @@ function OAuthReturn() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const notifyOpenerAndClose = (
-      type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
-      code?: string,
+
+    const handOff = (
+      type: OAuthHandoffPayload["type"],
+      code?: string | null,
     ) => {
-      const payload = { type, connectorId: "google_calendar", code: code ?? null };
+      const payload: OAuthHandoffPayload = {
+        type,
+        connectorId: "google_calendar",
+        code: code ?? null,
+        at: Date.now(),
+      };
       const opener = window.opener as Window | null;
       if (opener) {
-        // Same-origin first; fall back to a wildcard target for embedded
-        // previews where the opener runs on a different preview host.
         try {
           opener.postMessage(payload, window.location.origin);
         } catch {
@@ -38,28 +43,35 @@ function OAuthReturn() {
           /* ignore */
         }
       }
+      // Works even when this page was opened as a standalone tab (no opener).
+      broadcastOAuthOutcome(payload);
+
       if (type === "appUserConnectorOAuthComplete") {
-        // Give the opener a moment to receive the message before closing.
-        window.setTimeout(() => window.close(), 400);
+        setMessage(
+          opener
+            ? "Connected. You can close this window."
+            : "Connected. You can close this tab and return to Aegis Prime.",
+        );
+        if (opener) window.setTimeout(() => window.close(), 600);
       }
     };
 
     if (params.get("success") !== "true") {
       setMessage(params.get("error") ?? "The calendar connection did not complete.");
-      notifyOpenerAndClose("appUserConnectorOAuthFailed");
+      handOff("appUserConnectorOAuthFailed");
       return;
     }
     const code = params.get("code");
     if (!code) {
       if (params.get("offline_access_allowed") === "false") {
-        notifyOpenerAndClose("appUserConnectorOAuthComplete");
+        handOff("appUserConnectorOAuthComplete");
         return;
       }
       setMessage("The calendar connection completed without an exchange code.");
-      notifyOpenerAndClose("appUserConnectorOAuthFailed");
+      handOff("appUserConnectorOAuthFailed");
       return;
     }
-    notifyOpenerAndClose("appUserConnectorOAuthComplete", code);
+    handOff("appUserConnectorOAuthComplete", code);
   }, []);
 
   return (
