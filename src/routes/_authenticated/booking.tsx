@@ -149,6 +149,8 @@ function BookingAdminPage() {
   const cancel = useServerFn(cancelAppointment);
 
   const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+
 
   const settingsQuery = useQuery({ queryKey: ["booking-settings"], queryFn: () => loadSettings() });
   const appointmentsQuery = useQuery({
