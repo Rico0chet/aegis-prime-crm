@@ -6,7 +6,9 @@ import {
   CalendarCheck2,
   CalendarDays,
   ClipboardList,
+  CreditCard,
   FileSpreadsheet,
+
   LayoutDashboard,
   LogOut,
   Menu,
@@ -33,7 +35,9 @@ const navigation = [
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
   { label: "Appointments", to: "/booking", icon: CalendarCheck2 },
   { label: "Data Export", to: "/export", icon: FileSpreadsheet },
+  { label: "Subscription", to: "/billing", icon: CreditCard },
   { label: "My Profile", to: "/profile", icon: UserCog },
+
 ] as const;
 
 const adminNavigation = [{ label: "Admin Portal", to: "/admin", icon: ShieldCheck }] as const;

@@ -37,6 +37,17 @@ import {
   type QuestionRow,
 } from "@/lib/admin";
 import {
+  effectivePriceCents,
+  formatMoney,
+  useBillingProducers,
+  useBillingSettings,
+  useUpdateBillingAccount,
+  useUpdateBillingSettings,
+  type AccessMode,
+  type BillingProducer,
+} from "@/lib/billing";
+
+import {
   CLIENT_STATUSES,
   POLICY_STATUSES,
   clientStatusLabel,
@@ -100,6 +111,7 @@ function AdminPage() {
           <TabsTrigger value="needs">Needs Analysis</TabsTrigger>
           <TabsTrigger value="producers">Producers & Roles</TabsTrigger>
           <TabsTrigger value="records">Records</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
         <TabsContent value="needs" className="mt-6">
           <NeedsAnalysisBuilder />
@@ -110,6 +122,10 @@ function AdminPage() {
         <TabsContent value="records" className="mt-6">
           <RecordsPanel />
         </TabsContent>
+        <TabsContent value="billing" className="mt-6">
+          <BillingPanel />
+        </TabsContent>
+
       </Tabs>
     </AppShell>
   );
@@ -607,6 +623,197 @@ function RecordsPanel() {
           {policies.length === 0 && <p className="p-4 text-sm text-brand-muted">No policies yet.</p>}
         </div>
       </Panel>
+    </div>
+  );
+}
+
+function BillingPanel() {
+  const { data: settings } = useBillingSettings();
+  const { data: producers = [], isLoading } = useBillingProducers();
+  const updateSettings = useUpdateBillingSettings();
+  const updateAccount = useUpdateBillingAccount();
+
+  const [basePrice, setBasePrice] = useState("");
+  const [referralPercent, setReferralPercent] = useState("");
+  const [trialDays, setTrialDays] = useState("");
+
+  useEffect(() => {
+    if (!settings) return;
+    setBasePrice((settings.base_price_cents / 100).toFixed(2));
+    setReferralPercent(String(settings.referral_discount_percent));
+    setTrialDays(String(settings.trial_days));
+  }, [settings]);
+
+  return (
+    <div className="space-y-6">
+      <Panel title="Plan settings">
+        <div className="grid gap-4 p-5 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="base-price">Standard monthly price (USD)</Label>
+            <Input
+              id="base-price"
+              value={basePrice}
+              onChange={(event) => setBasePrice(event.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="referral-percent">Referral discount (%)</Label>
+            <Input
+              id="referral-percent"
+              value={referralPercent}
+              onChange={(event) => setReferralPercent(event.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor="trial-days">Free trial length (days)</Label>
+            <Input
+              id="trial-days"
+              value={trialDays}
+              onChange={(event) => setTrialDays(event.target.value)}
+            />
+          </div>
+        </div>
+        <div className="border-t border-brand-border p-5">
+          <Button
+            onClick={() =>
+              updateSettings.mutate(
+                {
+                  base_price_cents: Math.round(Number(basePrice || 0) * 100),
+                  referral_discount_percent: Math.round(Number(referralPercent || 0)),
+                  trial_days: Math.round(Number(trialDays || 0)),
+                },
+                {
+                  onSuccess: () => toast.success("Plan settings saved"),
+                  onError: (error) => toast.error(error.message),
+                },
+              )
+            }
+          >
+            Save plan settings
+          </Button>
+          <p className="mt-2 text-xs text-brand-muted">
+            Changing the standard price here updates what producers see. Ask your builder to update
+            the checkout price to match.
+          </p>
+        </div>
+      </Panel>
+
+      <Panel title="Producer billing">
+        {isLoading && <p className="p-5 text-sm text-brand-muted">Loading…</p>}
+        <div className="divide-y divide-brand-border">
+          {producers.map((producer) => (
+            <ProducerBillingRow
+              key={producer.user_id}
+              producer={producer}
+              basePriceCents={settings?.base_price_cents ?? 2000}
+              referralPercent={settings?.referral_discount_percent ?? 0}
+              onSave={(patch) =>
+                updateAccount.mutate(
+                  { userId: producer.user_id, ...patch },
+                  {
+                    onSuccess: () => toast.success("Billing updated"),
+                    onError: (error) => toast.error(error.message),
+                  },
+                )
+              }
+            />
+          ))}
+          {!isLoading && producers.length === 0 && (
+            <p className="p-5 text-sm text-brand-muted">No producers yet.</p>
+          )}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function ProducerBillingRow({
+  producer,
+  basePriceCents,
+  referralPercent,
+  onSave,
+}: {
+  producer: BillingProducer;
+  basePriceCents: number;
+  referralPercent: number;
+  onSave: (patch: {
+    access_mode?: AccessMode;
+    discount_percent?: number;
+    custom_price_cents?: number | null;
+    trial_ends_at?: string;
+  }) => void;
+}) {
+  const [mode, setMode] = useState<AccessMode>(producer.access_mode as AccessMode);
+  const [discount, setDiscount] = useState(String(producer.discount_percent));
+  const [custom, setCustom] = useState(
+    producer.custom_price_cents == null ? "" : (producer.custom_price_cents / 100).toFixed(2),
+  );
+
+  const effective = effectivePriceCents(
+    {
+      access_mode: mode,
+      discount_percent: Number(discount || 0),
+      custom_price_cents: custom === "" ? null : Math.round(Number(custom) * 100),
+      referred_by: producer.referred_by,
+    },
+    { base_price_cents: basePriceCents, referral_discount_percent: referralPercent },
+  );
+
+  return (
+    <div className="grid gap-3 p-5 lg:grid-cols-[1.4fr_repeat(3,1fr)_auto] lg:items-end">
+      <div>
+        <p className="text-sm font-semibold">{producer.full_name ?? "Unnamed producer"}</p>
+        <p className="text-xs text-brand-muted">
+          {producer.agency ?? "—"} · code {producer.referral_code} · {producer.referral_count}{" "}
+          referral{producer.referral_count === 1 ? "" : "s"}
+          {producer.referred_by_code ? ` · referred by ${producer.referred_by_code}` : ""}
+        </p>
+        <p className="mt-1 text-xs text-brand-muted">
+          Plan status: {producer.subscription_status ?? "no paid plan"} · charged{" "}
+          {formatMoney(effective)}/mo
+        </p>
+      </div>
+
+      <div>
+        <Label>Access</Label>
+        <Select value={mode} onValueChange={(value) => setMode(value as AccessMode)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="trial">Trial</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
+            <SelectItem value="free">Free (comped)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Discount %</Label>
+        <Input value={discount} onChange={(event) => setDiscount(event.target.value)} />
+      </div>
+
+      <div>
+        <Label>Custom price (USD)</Label>
+        <Input
+          value={custom}
+          placeholder="—"
+          onChange={(event) => setCustom(event.target.value)}
+        />
+      </div>
+
+      <Button
+        variant="outline"
+        onClick={() =>
+          onSave({
+            access_mode: mode,
+            discount_percent: Math.max(0, Math.min(100, Math.round(Number(discount || 0)))),
+            custom_price_cents: custom === "" ? null : Math.round(Number(custom) * 100),
+          })
+        }
+      >
+        Save
+      </Button>
     </div>
   );
 }

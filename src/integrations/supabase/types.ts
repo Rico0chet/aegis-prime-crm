@@ -160,6 +160,72 @@ export type Database = {
           },
         ]
       }
+      billing_accounts: {
+        Row: {
+          access_mode: string
+          created_at: string
+          custom_price_cents: number | null
+          discount_percent: number
+          notes: string | null
+          referral_code: string
+          referred_by: string | null
+          trial_ends_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_mode?: string
+          created_at?: string
+          custom_price_cents?: number | null
+          discount_percent?: number
+          notes?: string | null
+          referral_code: string
+          referred_by?: string | null
+          trial_ends_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_mode?: string
+          created_at?: string
+          custom_price_cents?: number | null
+          discount_percent?: number
+          notes?: string | null
+          referral_code?: string
+          referred_by?: string | null
+          trial_ends_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_settings: {
+        Row: {
+          base_price_cents: number
+          created_at: string
+          id: boolean
+          referral_discount_percent: number
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          base_price_cents?: number
+          created_at?: string
+          id?: boolean
+          referral_discount_percent?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          base_price_cents?: number
+          created_at?: string
+          id?: boolean
+          referral_discount_percent?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       booking_settings: {
         Row: {
           buffer_minutes: number
@@ -699,6 +765,54 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          paddle_customer_id: string
+          paddle_subscription_id: string
+          price_id: string
+          product_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          paddle_customer_id: string
+          paddle_subscription_id: string
+          price_id: string
+          product_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          paddle_customer_id?: string
+          paddle_subscription_id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           client_id: string | null
@@ -776,6 +890,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: never; Returns: string }
+      has_billing_access: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
