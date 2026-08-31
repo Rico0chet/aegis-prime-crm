@@ -30,6 +30,7 @@ const navigation = [
   { label: "Client Registry", to: "/clients", icon: Users },
   { label: "Follow-ups", to: "/tasks", icon: BarChart3 },
   { label: "Renewals Desk", to: "/renewals", icon: CalendarDays },
+  { label: "Appointments", to: "/booking", icon: CalendarCheck2 },
   { label: "Data Export", to: "/export", icon: FileSpreadsheet },
   { label: "My Profile", to: "/profile", icon: UserCog },
 ] as const;
