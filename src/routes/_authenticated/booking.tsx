@@ -124,7 +124,6 @@ function waitForOAuthCompletionFromAnyWindow() {
     const onMessage = (event: MessageEvent) => {
       const type = event.data?.type;
       if (
-        event.origin !== window.location.origin ||
         event.data?.connectorId !== "google_calendar" ||
         (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
       )
