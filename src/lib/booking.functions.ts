@@ -157,6 +157,7 @@ export const getBookingSlots = createServerFn({ method: "GET" })
     );
     const busy = await loadBusy(settings.user_id, timeMin, timeMax);
     const open = filterAvailable(slots, busy, settings.slot_minutes, settings.lead_hours);
+    console.log("SLOTDBG", JSON.stringify({ date: data.date, today, last, work_days: settings.work_days, wdType: typeof settings.work_days[0], slots: slots.length, busy: busy.length, open: open.length }));
     return { slots: open.map((slot) => slot.toISOString()) };
   });
 
