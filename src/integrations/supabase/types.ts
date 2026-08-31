@@ -65,6 +65,158 @@ export type Database = {
           },
         ]
       }
+      app_user_connections: {
+        Row: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          calendar_event_id: string | null
+          calendar_provider: string | null
+          client_id: string | null
+          created_at: string
+          email: string
+          ends_at: string
+          first_name: string
+          id: string
+          last_name: string
+          meeting_url: string | null
+          phone: string | null
+          reason: string | null
+          starts_at: string
+          status: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calendar_event_id?: string | null
+          calendar_provider?: string | null
+          client_id?: string | null
+          created_at?: string
+          email: string
+          ends_at: string
+          first_name: string
+          id?: string
+          last_name: string
+          meeting_url?: string | null
+          phone?: string | null
+          reason?: string | null
+          starts_at: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calendar_event_id?: string | null
+          calendar_provider?: string | null
+          client_id?: string | null
+          created_at?: string
+          email?: string
+          ends_at?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          meeting_url?: string | null
+          phone?: string | null
+          reason?: string | null
+          starts_at?: string
+          status?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      booking_settings: {
+        Row: {
+          buffer_minutes: number
+          calendar_provider: string
+          created_at: string
+          end_time: string
+          headline: string | null
+          horizon_days: number
+          intro: string | null
+          is_enabled: boolean
+          lead_hours: number
+          slot_minutes: number
+          slug: string
+          start_time: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          work_days: number[]
+        }
+        Insert: {
+          buffer_minutes?: number
+          calendar_provider?: string
+          created_at?: string
+          end_time?: string
+          headline?: string | null
+          horizon_days?: number
+          intro?: string | null
+          is_enabled?: boolean
+          lead_hours?: number
+          slot_minutes?: number
+          slug: string
+          start_time?: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          work_days?: number[]
+        }
+        Update: {
+          buffer_minutes?: number
+          calendar_provider?: string
+          created_at?: string
+          end_time?: string
+          headline?: string | null
+          horizon_days?: number
+          intro?: string | null
+          is_enabled?: boolean
+          lead_hours?: number
+          slot_minutes?: number
+          slug?: string
+          start_time?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          work_days?: number[]
+        }
+        Relationships: []
+      }
       client_needs_analyses: {
         Row: {
           client_id: string
