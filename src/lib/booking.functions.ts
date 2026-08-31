@@ -56,33 +56,6 @@ async function loadSettingsBySlug(slug: string): Promise<BookingSettingsRow> {
 
 /* ------------------------------ public reads ------------------------------ */
 
-export const listBookingPages = createServerFn({ method: "GET" }).handler(async () => {
-  const supabaseAdmin = await getAdminClient();
-  const { data } = await supabaseAdmin
-    .from("booking_settings")
-    .select("user_id, slug, headline")
-    .eq("is_enabled", true)
-    .order("slug");
-  const rows = data ?? [];
-  if (rows.length === 0) return [] as { slug: string; name: string; agency: string | null }[];
-
-  const { data: profiles } = await supabaseAdmin
-    .from("profiles")
-    .select("id, full_name, agency")
-    .in(
-      "id",
-      rows.map((r) => r.user_id),
-    );
-
-  return rows.map((row) => {
-    const profile = (profiles ?? []).find((p) => p.id === row.user_id);
-    return {
-      slug: row.slug,
-      name: profile?.full_name ?? "Insurance advisor",
-      agency: profile?.agency ?? null,
-    };
-  });
-});
 
 export const getBookingPage = createServerFn({ method: "GET" })
   .inputValidator((input: { slug: string }) => ({ slug: cleanText(input.slug, 64) }))
