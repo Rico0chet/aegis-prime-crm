@@ -21,6 +21,11 @@ import {
   startCalendarConnect,
 } from "@/lib/booking.functions";
 import { cn } from "@/lib/utils";
+import {
+  OAUTH_CHANNEL,
+  clearStoredOAuthOutcome,
+  takeStoredOAuthOutcome,
+} from "@/lib/oauth-handoff";
 
 export const Route = createFileRoute("/_authenticated/booking")({
   head: () => ({
