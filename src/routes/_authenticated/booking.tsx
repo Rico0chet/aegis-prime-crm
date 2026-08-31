@@ -107,6 +107,37 @@ function waitForOAuthCompletion(popup: Window) {
   });
 }
 
+/** Fallback used when the browser (or the embedded preview) blocks popups. */
+function waitForOAuthCompletionFromAnyWindow() {
+  return new Promise<string | null>((resolve, reject) => {
+    let timeout: number | undefined;
+    const cleanup = () => {
+      window.removeEventListener("message", onMessage);
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    };
+    const onMessage = (event: MessageEvent) => {
+      const type = event.data?.type;
+      if (
+        event.origin !== window.location.origin ||
+        event.data?.connectorId !== "google_calendar" ||
+        (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
+      )
+        return;
+      cleanup();
+      if (type === "appUserConnectorOAuthComplete") {
+        resolve(typeof event.data?.code === "string" ? event.data.code : null);
+        return;
+      }
+      reject(new Error("The calendar connection failed."));
+    };
+    window.addEventListener("message", onMessage);
+    timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Timed out waiting for Google. Try the connect link again."));
+    }, 10 * 60 * 1000);
+  });
+}
+
 function BookingAdminPage() {
   const queryClient = useQueryClient();
   const loadSettings = useServerFn(getMyBookingSettings);
