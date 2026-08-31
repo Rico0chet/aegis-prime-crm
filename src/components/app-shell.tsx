@@ -6,7 +6,9 @@ import {
   CalendarCheck2,
   CalendarDays,
   ClipboardList,
+  CreditCard,
   FileSpreadsheet,
+
   LayoutDashboard,
   LogOut,
   Menu,
