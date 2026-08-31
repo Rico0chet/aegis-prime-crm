@@ -428,16 +428,37 @@ export const completeCalendarConnection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { code: string }) => ({ code: cleanText(input.code, 512) }))
   .handler(async ({ data, context }) => {
+    return exchangeAndStore(data.code, context.userId);
+  });
+
+/**
+ * Exchange codes are single-use. If the code was already redeemed (a duplicate
+ * effect run, a refreshed return page, or both tabs finishing), treat it as a
+ * success when the user already has a stored connection key.
+ */
+async function exchangeAndStore(code: string, userId: string) {
+  try {
     const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
       GATEWAY_BASE_URL,
-      data.code,
+      code,
     );
     if (connectorId !== CALENDAR_CONNECTOR_ID) {
       throw new Error("OAuth completion returned the wrong connector.");
     }
-    await saveConnectionKeyForUser(context.userId, connectorId, connectionAPIKey);
+    await saveConnectionKeyForUser(userId, connectorId, connectionAPIKey);
     return { ok: true as const };
-  });
+  } catch (error) {
+    const existing = await getConnectionKeyForUser(userId, CALENDAR_CONNECTOR_ID);
+    if (existing) return { ok: true as const };
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes("invalid_exchange_code")) {
+      throw new Error(
+        "That connection link was already used or has expired. Start again from Booking.",
+      );
+    }
+    throw error;
+  }
+}
 
 /**
  * Completes OAuth from the standalone return tab. The signed, short-lived
