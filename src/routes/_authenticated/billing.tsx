@@ -51,7 +51,10 @@ function BillingPage() {
     try {
       const { data } = await supabase.auth.getUser();
       if (!data.user) throw new Error("Not signed in");
-      await openCheckout({ userId: data.user.id, customerEmail: data.user.email ?? undefined });
+      await openCheckout({
+        userId: data.user.id,
+        ...(data.user.email ? { customerEmail: data.user.email } : {}),
+      });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not open checkout");
     } finally {
