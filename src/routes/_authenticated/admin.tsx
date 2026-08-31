@@ -111,6 +111,7 @@ function AdminPage() {
           <TabsTrigger value="needs">Needs Analysis</TabsTrigger>
           <TabsTrigger value="producers">Producers & Roles</TabsTrigger>
           <TabsTrigger value="records">Records</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
         <TabsContent value="needs" className="mt-6">
           <NeedsAnalysisBuilder />
@@ -121,6 +122,10 @@ function AdminPage() {
         <TabsContent value="records" className="mt-6">
           <RecordsPanel />
         </TabsContent>
+        <TabsContent value="billing" className="mt-6">
+          <BillingPanel />
+        </TabsContent>
+
       </Tabs>
     </AppShell>
   );
