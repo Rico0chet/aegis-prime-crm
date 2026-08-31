@@ -187,25 +187,33 @@ function BookingAdminPage() {
   const connectMutation = useMutation({
     mutationFn: async () => {
       const popup = window.open("", "lovable-oauth", "width=600,height=720");
-      if (!popup) throw new Error("Popup blocked. Allow popups and try again.");
-      let code: string | null;
+      let code: string | null = null;
       try {
         const { authorizationUrl } = await startConnect();
-        const completion = waitForOAuthCompletion(popup);
-        popup.location.href = authorizationUrl;
-        code = await completion;
+        if (popup) {
+          const completion = waitForOAuthCompletion(popup);
+          popup.location.href = authorizationUrl;
+          code = await completion;
+        } else {
+          // Popups are blocked (common inside the embedded preview frame):
+          // surface a link the user can open manually in a new tab.
+          setFallbackUrl(authorizationUrl);
+          code = await waitForOAuthCompletionFromAnyWindow();
+        }
       } catch (error) {
-        popup.close();
+        popup?.close();
         throw error;
       }
       if (code) await completeConnect({ data: { code } });
     },
     onSuccess: () => {
+      setFallbackUrl(null);
       toast.success("Google Calendar connected");
       queryClient.invalidateQueries({ queryKey: ["booking-settings"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   const disconnectMutation = useMutation({
     mutationFn: () => disconnect(),
