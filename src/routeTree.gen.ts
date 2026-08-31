@@ -21,6 +21,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticated/renewals'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as BookIndexRouteImport } from './routes/book/index'
+import { Route as BookSlugRouteImport } from './routes/book/$slug'
 import { Route as IntakeTokenRouteImport } from './routes/intake.$token'
 import { Route as QuestionnaireTokenRouteImport } from './routes/questionnaire.$token'
 import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
@@ -85,6 +86,11 @@ const BookIndexRoute = BookIndexRouteImport.update({
   path: '/book/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookSlugRoute = BookSlugRouteImport.update({
+  id: '/book/$slug',
+  path: '/book/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IntakeTokenRoute = IntakeTokenRouteImport.update({
   id: '/intake/$token',
   path: '/intake/$token',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/book/$slug': typeof BookSlugRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/book/': typeof BookIndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/renewals': typeof AuthenticatedRenewalsRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/book/$slug': typeof BookSlugRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/book': typeof BookIndexRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/renewals': typeof AuthenticatedRenewalsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/book/$slug': typeof BookSlugRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
   '/book/': typeof BookIndexRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/renewals'
     | '/tasks'
+    | '/book/$slug'
     | '/intake/$token'
     | '/questionnaire/$token'
     | '/book/'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/renewals'
     | '/tasks'
+    | '/book/$slug'
     | '/intake/$token'
     | '/questionnaire/$token'
     | '/book'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/renewals'
     | '/_authenticated/tasks'
+    | '/book/$slug'
     | '/intake/$token'
     | '/questionnaire/$token'
     | '/book/'
@@ -220,6 +232,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BookSlugRoute: typeof BookSlugRoute
   IntakeTokenRoute: typeof IntakeTokenRoute
   QuestionnaireTokenRoute: typeof QuestionnaireTokenRoute
   BookIndexRoute: typeof BookIndexRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/book/$slug': {
+      id: '/book/$slug'
+      path: '/book/$slug'
+      fullPath: '/book/$slug'
+      preLoaderRoute: typeof BookSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/intake/$token': {
       id: '/intake/$token'
       path: '/intake/$token'
@@ -373,6 +393,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BookSlugRoute: BookSlugRoute,
   IntakeTokenRoute: IntakeTokenRoute,
   QuestionnaireTokenRoute: QuestionnaireTokenRoute,
   BookIndexRoute: BookIndexRoute,
