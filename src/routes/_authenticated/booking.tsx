@@ -266,6 +266,23 @@ function BookingAdminPage() {
             </Button>
           )}
         </div>
+        {!connected && fallbackUrl ? (
+          <div className="mt-4 rounded-lg border border-brand-border bg-brand-bg p-4 text-sm">
+            <p className="font-medium">Your browser blocked the popup window.</p>
+            <p className="mt-1 text-brand-muted">
+              Open Google authorization in a new tab instead — this page will finish the connection
+              automatically once you approve.
+            </p>
+            <a
+              href={fallbackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
+            >
+              <ExternalLink className="size-4" /> Open Google authorization
+            </a>
+          </div>
+        ) : null}
       </section>
 
       <section className="rounded-xl border border-brand-border bg-brand-card p-6 shadow-brand-card">
