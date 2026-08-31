@@ -22,11 +22,26 @@ function OAuthReturn() {
       type: "appUserConnectorOAuthComplete" | "appUserConnectorOAuthFailed",
       code?: string,
     ) => {
-      window.opener?.postMessage(
-        { type, connectorId: "google_calendar", code: code ?? null },
-        window.location.origin,
-      );
-      window.close();
+      const payload = { type, connectorId: "google_calendar", code: code ?? null };
+      const opener = window.opener as Window | null;
+      if (opener) {
+        // Same-origin first; fall back to a wildcard target for embedded
+        // previews where the opener runs on a different preview host.
+        try {
+          opener.postMessage(payload, window.location.origin);
+        } catch {
+          /* ignore */
+        }
+        try {
+          opener.postMessage(payload, "*");
+        } catch {
+          /* ignore */
+        }
+      }
+      if (type === "appUserConnectorOAuthComplete") {
+        // Give the opener a moment to receive the message before closing.
+        window.setTimeout(() => window.close(), 400);
+      }
     };
 
     if (params.get("success") !== "true") {
