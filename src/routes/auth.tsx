@@ -53,14 +53,21 @@ function AuthPage() {
     setMessage(null);
 
     if (mode === "signup") {
+      const referralCode =
+        new URLSearchParams(window.location.search).get("ref")?.trim().toUpperCase() ?? "";
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { full_name: fullName.trim(), agency: agency.trim() },
+          data: {
+            full_name: fullName.trim(),
+            agency: agency.trim(),
+            ...(referralCode ? { referral_code: referralCode } : {}),
+          },
         },
       });
+
       setBusy(false);
       if (signUpError) {
         setError(signUpError.message);
