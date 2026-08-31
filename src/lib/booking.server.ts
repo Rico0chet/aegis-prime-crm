@@ -135,32 +135,52 @@ async function googleBusy(
   const connectionAPIKey = await getConnectionKeyForUser(userId, CALENDAR_CONNECTOR_ID);
   if (!connectionAPIKey) return [];
   try {
+    const params = new URLSearchParams({
+      timeMin: timeMin.toISOString(),
+      timeMax: timeMax.toISOString(),
+      singleEvents: "true",
+      orderBy: "startTime",
+      maxResults: "250",
+    });
     const res = await callAsAppUser({
       gatewayBaseUrl: GATEWAY_BASE_URL,
       connectionAPIKey,
       connectorId: CALENDAR_CONNECTOR_ID,
-      path: "/calendar/v3/freeBusy",
-      init: {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          timeMin: timeMin.toISOString(),
-          timeMax: timeMax.toISOString(),
-          items: [{ id: "primary" }],
-        }),
-      },
+      path: `/calendar/v3/calendars/primary/events?${params.toString()}`,
+      init: { method: "GET" },
     });
     if (!res.ok) {
-      console.error(`freeBusy failed [${res.status}]: ${await res.text()}`);
+      console.error(`calendar events lookup failed [${res.status}]: ${await res.text()}`);
       return [];
     }
     const body = (await res.json()) as {
-      calendars?: Record<string, { busy?: { start: string; end: string }[] }>;
+      items?: {
+        status?: string;
+        transparency?: string;
+        eventType?: string;
+        start?: { dateTime?: string; date?: string };
+        end?: { dateTime?: string; date?: string };
+        attendees?: { self?: boolean; responseStatus?: string }[];
+      }[];
     };
-    const busy = body.calendars?.["primary"]?.busy ?? [];
-    return busy.map((b) => ({ start: Date.parse(b.start), end: Date.parse(b.end) }));
+
+    const busy: Busy[] = [];
+    for (const ev of body.items ?? []) {
+      if (ev.status === "cancelled") continue;
+      // All-day entries (birthdays, holidays, OOO markers) must not block the whole day.
+      if (!ev.start?.dateTime || !ev.end?.dateTime) continue;
+      if (ev.transparency === "transparent") continue;
+      if (ev.eventType === "birthday" || ev.eventType === "fromGmail") continue;
+      const self = ev.attendees?.find((a) => a.self);
+      if (self?.responseStatus === "declined") continue;
+      const start = Date.parse(ev.start.dateTime);
+      const end = Date.parse(ev.end.dateTime);
+      if (Number.isNaN(start) || Number.isNaN(end)) continue;
+      busy.push({ start, end });
+    }
+    return busy;
   } catch (error) {
-    console.error("freeBusy lookup failed", error);
+    console.error("calendar busy lookup failed", error);
     return [];
   }
 }
