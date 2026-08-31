@@ -22,6 +22,7 @@ import { Route as AuthenticatedRenewalsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as IntakeTokenRouteImport } from './routes/intake.$token'
 import { Route as QuestionnaireTokenRouteImport } from './routes/questionnaire.$token'
+import { Route as OauthGoogleCalendarReturnRouteImport } from './routes/oauth/google-calendar/return'
 import { Route as ApiPublicHooksBirthdayEmailsRouteImport } from './routes/api/public/hooks/birthday-emails'
 
 const IndexRoute = IndexRouteImport.update({
@@ -88,6 +89,12 @@ const QuestionnaireTokenRoute = QuestionnaireTokenRouteImport.update({
   path: '/questionnaire/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OauthGoogleCalendarReturnRoute =
+  OauthGoogleCalendarReturnRouteImport.update({
+    id: '/oauth/google-calendar/return',
+    path: '/oauth/google-calendar/return',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksBirthdayEmailsRoute =
   ApiPublicHooksBirthdayEmailsRouteImport.update({
     id: '/api/public/hooks/birthday-emails',
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRoutesByTo {
@@ -123,6 +131,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRoutesById {
@@ -140,6 +149,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/intake/$token': typeof IntakeTokenRoute
   '/questionnaire/$token': typeof QuestionnaireTokenRoute
+  '/oauth/google-calendar/return': typeof OauthGoogleCalendarReturnRoute
   '/api/public/hooks/birthday-emails': typeof ApiPublicHooksBirthdayEmailsRoute
 }
 export interface FileRouteTypes {
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   id:
     | '__root__'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/intake/$token'
     | '/questionnaire/$token'
+    | '/oauth/google-calendar/return'
     | '/api/public/hooks/birthday-emails'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +210,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   IntakeTokenRoute: typeof IntakeTokenRoute
   QuestionnaireTokenRoute: typeof QuestionnaireTokenRoute
+  OauthGoogleCalendarReturnRoute: typeof OauthGoogleCalendarReturnRoute
   ApiPublicHooksBirthdayEmailsRoute: typeof ApiPublicHooksBirthdayEmailsRoute
 }
 
@@ -293,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionnaireTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/oauth/google-calendar/return': {
+      id: '/oauth/google-calendar/return'
+      path: '/oauth/google-calendar/return'
+      fullPath: '/oauth/google-calendar/return'
+      preLoaderRoute: typeof OauthGoogleCalendarReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/birthday-emails': {
       id: '/api/public/hooks/birthday-emails'
       path: '/api/public/hooks/birthday-emails'
@@ -334,6 +355,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   IntakeTokenRoute: IntakeTokenRoute,
   QuestionnaireTokenRoute: QuestionnaireTokenRoute,
+  OauthGoogleCalendarReturnRoute: OauthGoogleCalendarReturnRoute,
   ApiPublicHooksBirthdayEmailsRoute: ApiPublicHooksBirthdayEmailsRoute,
 }
 export const routeTree = rootRouteImport
