@@ -282,13 +282,25 @@ function BookingAdminPage() {
               below in a new tab — this page finishes the connection automatically once you approve.
               If nothing happens, open the app in its own browser tab and connect from there.
             </p>
-            <a
-              href={fallbackUrl}
-              target="_blank"
-              className="mt-3 inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
-            >
-              <ExternalLink className="size-4" /> Open Google authorization
-            </a>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <a
+                href={fallbackUrl}
+                target="_blank"
+                className="inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
+              >
+                <ExternalLink className="size-4" /> Open Google authorization
+              </a>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  navigator.clipboard.writeText(fallbackUrl);
+                  toast.success("Authorization link copied");
+                }}
+              >
+                <Copy className="size-4" /> Copy link
+              </Button>
+            </div>
           </div>
         ) : null}
       </section>
