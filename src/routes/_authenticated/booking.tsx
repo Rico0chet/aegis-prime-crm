@@ -84,8 +84,6 @@ function waitForOAuthCompletion(popup: Window) {
     const onMessage = (event: MessageEvent) => {
       const type = event.data?.type;
       if (
-        event.origin !== window.location.origin ||
-        event.source !== popup ||
         event.data?.connectorId !== "google_calendar" ||
         (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
       )
@@ -101,8 +99,16 @@ function waitForOAuthCompletion(popup: Window) {
     window.addEventListener("message", onMessage);
     poll = window.setInterval(() => {
       if (!popup.closed) return;
-      cleanup();
-      reject(new Error("The connection window closed before finishing."));
+      // Grace period: the message can still be in flight when the popup closes.
+      window.clearInterval(poll);
+      window.setTimeout(() => {
+        cleanup();
+        reject(
+          new Error(
+            "The Google window closed before the connection finished. Try again and complete the Google approval screen.",
+          ),
+        );
+      }, 2000);
     }, 500);
   });
 }
@@ -118,7 +124,6 @@ function waitForOAuthCompletionFromAnyWindow() {
     const onMessage = (event: MessageEvent) => {
       const type = event.data?.type;
       if (
-        event.origin !== window.location.origin ||
         event.data?.connectorId !== "google_calendar" ||
         (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
       )
