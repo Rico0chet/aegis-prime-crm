@@ -104,6 +104,9 @@ function LandingPage() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
+              <Link to="/book">Book an appointment</Link>
+            </Button>
+            <Button asChild size="lg" variant="ghost">
               <Link to="/auth">Sign in</Link>
             </Button>
           </div>
