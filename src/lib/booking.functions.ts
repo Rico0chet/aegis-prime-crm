@@ -394,7 +394,7 @@ export const startCalendarConnect = createServerFn({ method: "POST" })
       appUserId: context.userId,
       clientAPIKey,
       returnUrl,
-      connectionAPIKey: existing ?? undefined,
+      ...(existing ? { connectionAPIKey: existing } : {}),
       credentialsConfiguration: { scopes: GOOGLE_SCOPES },
     });
     return { authorizationUrl };
