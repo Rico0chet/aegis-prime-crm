@@ -472,15 +472,7 @@ export const completeCalendarConnectionFromReturn = createServerFn({ method: "PO
   }))
   .handler(async ({ data }) => {
     const userId = readCalendarHandoff(data.handoff);
-    const { connectionAPIKey, connectorId } = await exchangeAppUserOAuthCode(
-      GATEWAY_BASE_URL,
-      data.code,
-    );
-    if (connectorId !== CALENDAR_CONNECTOR_ID) {
-      throw new Error("OAuth completion returned the wrong connector.");
-    }
-    await saveConnectionKeyForUser(userId, connectorId, connectionAPIKey);
-    return { ok: true as const };
+    return exchangeAndStore(data.code, userId);
   });
 
 export const disconnectCalendar = createServerFn({ method: "POST" })
