@@ -107,6 +107,37 @@ function waitForOAuthCompletion(popup: Window) {
   });
 }
 
+/** Fallback used when the browser (or the embedded preview) blocks popups. */
+function waitForOAuthCompletionFromAnyWindow() {
+  return new Promise<string | null>((resolve, reject) => {
+    let timeout: number | undefined;
+    const cleanup = () => {
+      window.removeEventListener("message", onMessage);
+      if (timeout !== undefined) window.clearTimeout(timeout);
+    };
+    const onMessage = (event: MessageEvent) => {
+      const type = event.data?.type;
+      if (
+        event.origin !== window.location.origin ||
+        event.data?.connectorId !== "google_calendar" ||
+        (type !== "appUserConnectorOAuthComplete" && type !== "appUserConnectorOAuthFailed")
+      )
+        return;
+      cleanup();
+      if (type === "appUserConnectorOAuthComplete") {
+        resolve(typeof event.data?.code === "string" ? event.data.code : null);
+        return;
+      }
+      reject(new Error("The calendar connection failed."));
+    };
+    window.addEventListener("message", onMessage);
+    timeout = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Timed out waiting for Google. Try the connect link again."));
+    }, 10 * 60 * 1000);
+  });
+}
+
 function BookingAdminPage() {
   const queryClient = useQueryClient();
   const loadSettings = useServerFn(getMyBookingSettings);
@@ -118,6 +149,8 @@ function BookingAdminPage() {
   const cancel = useServerFn(cancelAppointment);
 
   const [form, setForm] = useState<FormState>(DEFAULTS);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+
 
   const settingsQuery = useQuery({ queryKey: ["booking-settings"], queryFn: () => loadSettings() });
   const appointmentsQuery = useQuery({
@@ -156,25 +189,33 @@ function BookingAdminPage() {
   const connectMutation = useMutation({
     mutationFn: async () => {
       const popup = window.open("", "lovable-oauth", "width=600,height=720");
-      if (!popup) throw new Error("Popup blocked. Allow popups and try again.");
-      let code: string | null;
+      let code: string | null = null;
       try {
         const { authorizationUrl } = await startConnect();
-        const completion = waitForOAuthCompletion(popup);
-        popup.location.href = authorizationUrl;
-        code = await completion;
+        if (popup) {
+          const completion = waitForOAuthCompletion(popup);
+          popup.location.href = authorizationUrl;
+          code = await completion;
+        } else {
+          // Popups are blocked (common inside the embedded preview frame):
+          // surface a link the user can open manually in a new tab.
+          setFallbackUrl(authorizationUrl);
+          code = await waitForOAuthCompletionFromAnyWindow();
+        }
       } catch (error) {
-        popup.close();
+        popup?.close();
         throw error;
       }
       if (code) await completeConnect({ data: { code } });
     },
     onSuccess: () => {
+      setFallbackUrl(null);
       toast.success("Google Calendar connected");
       queryClient.invalidateQueries({ queryKey: ["booking-settings"] });
     },
     onError: (error: Error) => toast.error(error.message),
   });
+
 
   const disconnectMutation = useMutation({
     mutationFn: () => disconnect(),
@@ -225,6 +266,23 @@ function BookingAdminPage() {
             </Button>
           )}
         </div>
+        {!connected && fallbackUrl ? (
+          <div className="mt-4 rounded-lg border border-brand-border bg-brand-bg p-4 text-sm">
+            <p className="font-medium">Your browser blocked the popup window.</p>
+            <p className="mt-1 text-brand-muted">
+              Open Google authorization in a new tab instead — this page will finish the connection
+              automatically once you approve.
+            </p>
+            <a
+              href={fallbackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-2 rounded-md bg-brand-accent px-3 py-2 text-sm font-medium text-brand-accent-foreground"
+            >
+              <ExternalLink className="size-4" /> Open Google authorization
+            </a>
+          </div>
+        ) : null}
       </section>
 
       <section className="rounded-xl border border-brand-border bg-brand-card p-6 shadow-brand-card">
