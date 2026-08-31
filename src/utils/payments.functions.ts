@@ -24,15 +24,14 @@ export const resolvePaddlePrice = createServerFn({ method: "GET" })
   .inputValidator((data: { environment: PaddleEnv }) => data)
   .handler(async ({ data }) => paddlePriceId(data.environment));
 
-export type CheckoutOffer =
-  | { blocked: "comped" | "active"; reason: string }
-  | {
-      blocked: null;
-      paddlePriceId: string;
-      discountId: string | null;
-      basePriceCents: number;
-      effectiveCents: number;
-    };
+export type CheckoutOffer = {
+  blocked: "comped" | "active" | null;
+  reason?: string;
+  paddlePriceId?: string;
+  discountId?: string | null;
+  basePriceCents?: number;
+  effectiveCents?: number;
+};
 
 /**
  * Resolves the signed-in producer's exact monthly charge and, when it is below

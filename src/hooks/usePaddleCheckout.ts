@@ -14,7 +14,9 @@ export function usePaddleCheckout() {
     try {
       const environment = getPaddleEnvironment();
       const offer = await resolveCheckoutOffer({ data: { environment } });
-      if (offer.blocked) throw new Error(offer.reason);
+      if (offer.blocked || !offer.paddlePriceId) {
+        throw new Error(offer.reason ?? "Checkout is not available for this account.");
+      }
 
       await initializePaddle();
       window.Paddle.Checkout.open({
