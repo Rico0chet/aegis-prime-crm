@@ -20,6 +20,7 @@ export function usePaddleCheckout() {
       }
 
       await initializePaddle();
+      onCheckoutError((message) => toast.error(message));
       window.Paddle.Checkout.open({
         items: [{ priceId: offer.paddlePriceId, quantity: 1 }],
         ...(offer.discountId ? { discountId: offer.discountId } : {}),
