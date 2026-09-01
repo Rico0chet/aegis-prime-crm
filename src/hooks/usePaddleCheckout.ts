@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { initializePaddle, getPaddleEnvironment } from "@/lib/paddle";
+import { toast } from "sonner";
+import { initializePaddle, getPaddleEnvironment, onCheckoutError } from "@/lib/paddle";
 import { createPortalSession, resolveCheckoutOffer } from "@/utils/payments.functions";
 
 export function usePaddleCheckout() {
@@ -19,6 +20,7 @@ export function usePaddleCheckout() {
       }
 
       await initializePaddle();
+      onCheckoutError((message) => toast.error(message));
       window.Paddle.Checkout.open({
         items: [{ priceId: offer.paddlePriceId, quantity: 1 }],
         ...(offer.discountId ? { discountId: offer.discountId } : {}),
