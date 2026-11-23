@@ -15,6 +15,13 @@
       "when": 1795459074983,
       "tag": "0001_intake_link_templates",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795459275203,
+      "tag": "0002_restrict_template_reads",
+      "breakpoints": true
     }
   ]
 }
