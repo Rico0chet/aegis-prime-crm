@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { groupBySection, QuestionField } from "@/components/needs-analysis-dialog";
+import type { QuestionRow } from "@/lib/admin";
 import { getIntakeForm, submitIntakeForm } from "@/lib/intake.functions";
 
 export const Route = createFileRoute("/intake/$token")({
@@ -37,6 +39,7 @@ function IntakePage() {
   const loadForm = useServerFn(getIntakeForm);
   const submit = useServerFn(submitIntakeForm);
   const [done, setDone] = useState(false);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["intake", token],
@@ -52,7 +55,7 @@ function IntakePage() {
       phone: string;
       date_of_birth: string;
       notes: string;
-    }) => submit({ data: { token, ...values } }),
+    }) => submit({ data: { token, ...values, answers } }),
     onSuccess: () => setDone(true),
     onError: (mutationError: Error) => toast.error(mutationError.message),
   });
@@ -120,6 +123,22 @@ function IntakePage() {
                 placeholder="Coverage goals, family situation, best time to reach you…"
               />
             </div>
+            {groupBySection(data.questions as unknown as QuestionRow[]).map(([section, items]) => (
+              <section key={section} className="space-y-4 border-t border-brand-border pt-4">
+                {section && (
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-brand-accent">{section}</h2>
+                )}
+                {items.map((question) => (
+                  <QuestionField
+                    key={question.id}
+                    question={question}
+                    hideHelpText={Boolean(section)}
+                    value={answers[question.id] ?? ""}
+                    onChange={(value) => setAnswers((prev) => ({ ...prev, [question.id]: value }))}
+                  />
+                ))}
+              </section>
+            ))}
             <Button type="submit" className="w-full" disabled={submitMutation.isPending}>
               {submitMutation.isPending ? "Submitting…" : "Submit my details"}
             </Button>

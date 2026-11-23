@@ -145,7 +145,7 @@ export function NeedsAnalysisDialog({
   );
 }
 
-function groupBySection(questions: QuestionRow[]): [string, QuestionRow[]][] {
+export function groupBySection(questions: QuestionRow[]): [string, QuestionRow[]][] {
   const groups = new Map<string, QuestionRow[]>();
   for (const question of questions) {
     const key = question.help_text?.trim() ?? "";
@@ -156,7 +156,7 @@ function groupBySection(questions: QuestionRow[]): [string, QuestionRow[]][] {
   return [...groups.entries()];
 }
 
-function QuestionField({
+export function QuestionField({
   question,
   value,
   onChange,

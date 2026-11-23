@@ -437,6 +437,7 @@ export type Database = {
           is_active: boolean
           label: string | null
           submission_count: number
+          template_id: string | null
           token: string
           updated_at: string
           user_id: string
@@ -447,6 +448,7 @@ export type Database = {
           is_active?: boolean
           label?: string | null
           submission_count?: number
+          template_id?: string | null
           token: string
           updated_at?: string
           user_id: string
@@ -457,11 +459,20 @@ export type Database = {
           is_active?: boolean
           label?: string | null
           submission_count?: number
+          template_id?: string | null
           token?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "intake_links_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "needs_analysis_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       needs_analysis_answers: {
         Row: {

@@ -32,12 +32,12 @@ export function useIntakeLinks(enabled = true) {
 export function useCreateIntakeLink() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (label: string | null) => {
+    mutationFn: async ({ label, templateId }: { label: string | null; templateId: string | null }) => {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData.user) throw new Error("Not signed in");
       const { data, error } = await supabase
         .from("intake_links")
-        .insert({ user_id: userData.user.id, token: generateToken(), label })
+        .insert({ user_id: userData.user.id, token: generateToken(), label, template_id: templateId })
         .select()
         .single();
       if (error) throw error;

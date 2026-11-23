@@ -3,6 +3,20 @@ export type PublicIntake = {
   advisorName: string;
   agency: string | null;
   label: string | null;
+  questions: IntakeQuestion[];
+};
+
+export type IntakeQuestion = {
+  id: string;
+  prompt: string;
+  help_text: string | null;
+  input_type: string;
+  options: string[];
+  is_required: boolean;
+  sort_order: number;
+  template_id: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export async function getAdminClient() {
@@ -16,6 +30,7 @@ export type LoadedIntakeLink = {
   label: string | null;
   is_active: boolean;
   submission_count: number;
+  template_id: string | null;
 };
 
 export async function loadIntakeLink(token: string): Promise<LoadedIntakeLink> {
@@ -23,7 +38,7 @@ export async function loadIntakeLink(token: string): Promise<LoadedIntakeLink> {
   const supabaseAdmin = await getAdminClient();
   const { data, error } = await supabaseAdmin
     .from("intake_links")
-    .select("id, user_id, label, is_active, submission_count")
+    .select("id, user_id, label, is_active, submission_count, template_id")
     .eq("token", token)
     .maybeSingle();
 

@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTemplates } from "@/lib/admin";
 import { formatDate } from "@/lib/crm";
 import {
   intakeUrl,
@@ -25,6 +27,10 @@ import {
 export function IntakeLinkDialog({ trigger }: { trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("");
+  const [templateId, setTemplateId] = useState("33333333-3333-4333-8333-333333333333");
+  const { data: templates = [] } = useTemplates();
+  const activeTemplates = templates.filter((t) => t.is_active);
+  const templateName = (id: string | null) => templates.find((t) => t.id === id)?.name;
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: links = [], isLoading } = useIntakeLinks(open);
@@ -65,11 +71,27 @@ export function IntakeLinkDialog({ trigger }: { trigger: React.ReactNode }) {
               placeholder="Website, referral card, seminar…"
             />
           </div>
+          <div className="w-48 space-y-2">
+            <Label>Questions</Label>
+            <Select value={templateId} onValueChange={setTemplateId}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Contact details only</SelectItem>
+                {activeTemplates.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             className="gap-2"
             disabled={createLink.isPending}
             onClick={() =>
-              createLink.mutate(label.trim() || null, {
+              createLink.mutate({ label: label.trim() || null, templateId: templateId === "none" ? null : templateId }, {
                 onSuccess: () => {
                   setLabel("");
                   toast.success("Intake link created");
@@ -90,7 +112,7 @@ export function IntakeLinkDialog({ trigger }: { trigger: React.ReactNode }) {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{link.label ?? "Intake link"}</p>
                   <p className="mt-1 truncate text-[11px] text-brand-muted">
-                    {link.is_active ? "Active" : "Disabled"} • {link.submission_count} submission
+                    {link.is_active ? "Active" : "Disabled"} • {templateName(link.template_id) ?? "Contact details only"} • {link.submission_count} submission
                     {link.submission_count === 1 ? "" : "s"} • Created {formatDate(link.created_at)}
                   </p>
                 </div>
