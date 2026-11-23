@@ -53,10 +53,7 @@ export const resolveCheckoutOffer = createServerFn({ method: "POST" })
         )
         .eq("user_id", userId)
         .maybeSingle(),
-      supabase
-        .from("billing_settings")
-        .select("base_price_cents, referral_discount_percent")
-        .maybeSingle(),
+      supabase.rpc("get_billing_pricing").then((r) => ({ ...r, data: r.data?.[0] ?? null })),
     ]);
 
     if (account?.access_mode === "free") {

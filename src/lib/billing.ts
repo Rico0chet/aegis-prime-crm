@@ -31,9 +31,12 @@ export function useBillingSettings() {
   return useQuery({
     queryKey: ["billing-settings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("billing_settings").select("*").maybeSingle();
+      const { data, error } = await supabase.rpc("get_billing_pricing");
       if (error) throw error;
-      return data as BillingSettings | null;
+      return (data?.[0] ?? null) as Pick<
+        BillingSettings,
+        "base_price_cents" | "referral_discount_percent" | "trial_days"
+      > | null;
     },
   });
 }
